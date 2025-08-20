@@ -1726,7 +1726,7 @@ if ($result_lokasi && $result_lokasi->num_rows > 0) {
                     <div class="mb-3">
                         <label for="add-role" class="form-label">Role</label>
                         <select class="form-select" id="add-role" name="data[role]" required>
-                            <option value="anggota">Anggota</option>
+                           
                             <option value="sekretaris">Sekretaris</option>
                             <option value="bendahara">Bendahara</option>
                             <option value="admin">Admin</option>
@@ -1734,10 +1734,9 @@ if ($result_lokasi && $result_lokasi->num_rows > 0) {
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label for="add-anggota-id-user" class="form-label">Anggota Terkait (opsional)</label>
-                        <select class="form-select" id="add-anggota-id-user" name="data[anggota_id]">
-                            <option value="">Tidak Terkait</option>
-                            <?php foreach ($anggotaList as $anggota): ?>
+                        <label for="add-anggota-id-user" class="form-label">Anggota Terkait <span class="text-danger">*</span></label>
+                        <select class="form-select" id="add-anggota-id-user" name="data[anggota_id]" required>
+                            <option value="">Pilih Anggota</option> <?php foreach ($anggotaList as $anggota): ?>
                                 <option value="<?= $anggota['id'] ?>"><?= htmlspecialchars($anggota['nama_lengkap']) ?></option>
                             <?php endforeach; ?>
                         </select>
@@ -1775,7 +1774,7 @@ if ($result_lokasi && $result_lokasi->num_rows > 0) {
                     <div class="mb-3">
                         <label for="edit-role" class="form-label">Role</label>
                         <select class="form-select" id="edit-role" name="data[role]" required>
-                            <option value="anggota">Anggota</option>
+                            
                             <option value="sekretaris">Sekretaris</option>
                             <option value="bendahara">Bendahara</option>
                             <option value="admin">Admin</option>
@@ -1783,10 +1782,9 @@ if ($result_lokasi && $result_lokasi->num_rows > 0) {
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label for="edit-anggota-id-user" class="form-label">Anggota Terkait (opsional)</label>
-                        <select class="form-select" id="edit-anggota-id-user" name="data[anggota_id]">
-                            <option value="">Tidak Terkait</option>
-                            <?php foreach ($anggotaList as $anggota): ?>
+                        <label for="add-anggota-id-user" class="form-label">Anggota Terkait <span class="text-danger">*</span></label>
+                        <select class="form-select" id="add-anggota-id-user" name="data[anggota_id]" required>
+                            <option value="">Pilih Anggota</option> <?php foreach ($anggotaList as $anggota): ?>
                                 <option value="<?= $anggota['id'] ?>"><?= htmlspecialchars($anggota['nama_lengkap']) ?></option>
                             <?php endforeach; ?>
                         </select>
