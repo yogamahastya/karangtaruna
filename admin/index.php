@@ -1734,12 +1734,14 @@ if ($result_lokasi && $result_lokasi->num_rows > 0) {
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label for="add-anggota-id-user" class="form-label">Anggota Terkait <span class="text-danger">*</span></label>
-                        <select class="form-select" id="add-anggota-id-user" name="data[anggota_id]" required>
-                            <option value="">Pilih Anggota</option> <?php foreach ($anggotaList as $anggota): ?>
-                                <option value="<?= $anggota['id'] ?>"><?= htmlspecialchars($anggota['nama_lengkap']) ?></option>
-                            <?php endforeach; ?>
-                        </select>
+                        <label for="search-anggota-user" class="form-label">Anggota Terkait <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="search-anggota-user" placeholder="Cari anggota...">
+                            <span class="input-group-text"><i class="fas fa-search"></i></span>
+                        </div>
+                        <div id="search-results-user" class="list-group mt-2" style="max-height: 200px; overflow-y: auto;">
+                        </div>
+                        <input type="hidden" name="data[anggota_id]" id="add-anggota-id-user" required>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
@@ -1782,12 +1784,14 @@ if ($result_lokasi && $result_lokasi->num_rows > 0) {
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label for="add-anggota-id-user" class="form-label">Anggota Terkait <span class="text-danger">*</span></label>
-                        <select class="form-select" id="add-anggota-id-user" name="data[anggota_id]" required>
-                            <option value="">Pilih Anggota</option> <?php foreach ($anggotaList as $anggota): ?>
-                                <option value="<?= $anggota['id'] ?>"><?= htmlspecialchars($anggota['nama_lengkap']) ?></option>
-                            <?php endforeach; ?>
-                        </select>
+                        <label for="search-anggota-user" class="form-label">Anggota Terkait <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="search-anggota-user" placeholder="Cari anggota...">
+                            <span class="input-group-text"><i class="fas fa-search"></i></span>
+                        </div>
+                        <div id="search-results-user" class="list-group mt-2" style="max-height: 200px; overflow-y: auto;">
+                        </div>
+                        <input type="hidden" name="data[anggota_id]" id="add-anggota-id-user" required>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
@@ -2080,6 +2084,49 @@ if ($result_lokasi && $result_lokasi->num_rows > 0) {
             });
         }
     });
+    //Bagian USer
+    document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('search-anggota-user');
+    const searchResults = document.getElementById('search-results-user');
+    const selectedAnggotaId = document.getElementById('add-anggota-id-user');
+
+    // Asumsi Anda memiliki data anggota dalam variabel JavaScript
+    // Jika tidak, Anda bisa mengambilnya dari PHP dan menyimpannya di sini.
+    const anggotaList = [
+        <?php foreach ($anggotaList as $anggota): ?>
+            { id: <?= $anggota['id'] ?>, nama: '<?= htmlspecialchars($anggota['nama_lengkap']) ?>' },
+        <?php endforeach; ?>
+    ];
+
+    searchInput.addEventListener('input', function() {
+        const query = this.value.toLowerCase();
+        searchResults.innerHTML = ''; // Kosongkan hasil sebelumnya
+
+        if (query.length > 0) {
+            const filteredAnggota = anggotaList.filter(anggota =>
+                anggota.nama.toLowerCase().includes(query)
+            );
+
+            filteredAnggota.forEach(anggota => {
+                const item = document.createElement('a');
+                item.href = '#';
+                item.className = 'list-group-item list-group-item-action';
+                item.textContent = anggota.nama;
+                item.setAttribute('data-id', anggota.id);
+                item.setAttribute('data-nama', anggota.nama);
+
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    searchInput.value = this.getAttribute('data-nama');
+                    selectedAnggotaId.value = this.getAttribute('data-id');
+                    searchResults.innerHTML = ''; // Sembunyikan hasil setelah memilih
+                });
+
+                searchResults.appendChild(item);
+            });
+        }
+    });
+});
 </script>
 </body>
 </html>
