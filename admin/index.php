@@ -440,7 +440,7 @@ $totalAnggota = countRowsWithFilter($conn, 'anggota');
 $totalPemasukan = 0;
 $totalPengeluaran = 0;
 // Perbaikan: Pastikan fetchDataWithPagination di sini juga menggunakan parameter yang benar
-$allKeuangan = fetchDataWithPagination($conn, 'keuangan', 0, 999999, null, $selectedYear);
+$allKeuangan = fetchDataWithPagination($conn, 'keuangan', 0, 10, null, $selectedYear);
 foreach ($allKeuangan as $transaksi) {
     if ($transaksi['jenis_transaksi'] == 'pemasukan') {
         $totalPemasukan += $transaksi['jumlah'];
@@ -451,13 +451,13 @@ foreach ($allKeuangan as $transaksi) {
 $saldo = $totalPemasukan - $totalPengeluaran;
 $totalIuran = 0;
 // Perbaikan: Pastikan fetchDataWithPagination di sini juga menggunakan parameter yang benar
-$allIuran = fetchDataWithPagination($conn, 'iuran', 0, 999999, null, $selectedYear);
+$allIuran = fetchDataWithPagination($conn, 'iuran', 0, 10, null, $selectedYear);
 foreach ($allIuran as $transaksi) {
     $totalIuran += $transaksi['jumlah_bayar'];
 }
 
 // Perbaikan: Pastikan fetchDataWithPagination di sini juga menggunakan parameter yang benar
-$anggotaList = fetchDataWithPagination($conn, 'anggota', 0, 999999, null, null); // Untuk dropdown di modal
+$anggotaList = fetchDataWithPagination($conn, 'anggota', 0, 10, null, null); // Untuk dropdown di modal
 
 // Ambil data lokasi absensi saat ini dari database untuk pre-fill modal
 $current_latitude = -7.527444; // Default jika belum ada di DB
