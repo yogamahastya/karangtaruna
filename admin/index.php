@@ -1776,7 +1776,6 @@ if ($result_lokasi && $result_lokasi->num_rows > 0) {
                     <div class="mb-3">
                         <label for="edit-role" class="form-label">Role</label>
                         <select class="form-select" id="edit-role" name="data[role]" required>
-                            
                             <option value="sekretaris">Sekretaris</option>
                             <option value="bendahara">Bendahara</option>
                             <option value="admin">Admin</option>
@@ -1784,14 +1783,14 @@ if ($result_lokasi && $result_lokasi->num_rows > 0) {
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label for="search-anggota-user" class="form-label">Anggota Terkait <span class="text-danger">*</span></label>
+                        <label for="edit-search-anggota-user" class="form-label">Anggota Terkait <span class="text-danger">*</span></label>
                         <div class="input-group">
-                            <input type="text" class="form-control" id="search-anggota-user" placeholder="Cari anggota...">
+                            <input type="text" class="form-control" id="edit-search-anggota-user" placeholder="Cari anggota...">
                             <span class="input-group-text"><i class="fas fa-search"></i></span>
                         </div>
-                        <div id="search-results-user" class="list-group mt-2" style="max-height: 200px; overflow-y: auto;">
+                        <div id="edit-search-results-user" class="list-group mt-2" style="max-height: 200px; overflow-y: auto;">
                         </div>
-                        <input type="hidden" name="data[anggota_id]" id="add-anggota-id-user" required>
+                        <input type="hidden" name="data[anggota_id]" id="edit-anggota-id-user" required>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
@@ -2084,49 +2083,103 @@ if ($result_lokasi && $result_lokasi->num_rows > 0) {
             });
         }
     });
-    //Bagian USer
+</script>
+<script>
     document.addEventListener('DOMContentLoaded', function() {
-    const searchInput = document.getElementById('search-anggota-user');
-    const searchResults = document.getElementById('search-results-user');
-    const selectedAnggotaId = document.getElementById('add-anggota-id-user');
-
-    // Asumsi Anda memiliki data anggota dalam variabel JavaScript
-    // Jika tidak, Anda bisa mengambilnya dari PHP dan menyimpannya di sini.
+    // Pastikan data anggota tersedia (misal dari PHP)
     const anggotaList = [
         <?php foreach ($anggotaList as $anggota): ?>
             { id: <?= $anggota['id'] ?>, nama: '<?= htmlspecialchars($anggota['nama_lengkap']) ?>' },
         <?php endforeach; ?>
     ];
 
-    searchInput.addEventListener('input', function() {
-        const query = this.value.toLowerCase();
-        searchResults.innerHTML = ''; // Kosongkan hasil sebelumnya
+    // --- Skrip untuk Modal TAMBAH User (dari perbaikan sebelumnya) ---
+    const searchInputAdd = document.getElementById('search-anggota-user');
+    const searchResultsAdd = document.getElementById('search-results-user');
+    const selectedAnggotaIdAdd = document.getElementById('add-anggota-id-user');
 
-        if (query.length > 0) {
-            const filteredAnggota = anggotaList.filter(anggota =>
-                anggota.nama.toLowerCase().includes(query)
-            );
-
-            filteredAnggota.forEach(anggota => {
-                const item = document.createElement('a');
-                item.href = '#';
-                item.className = 'list-group-item list-group-item-action';
-                item.textContent = anggota.nama;
-                item.setAttribute('data-id', anggota.id);
-                item.setAttribute('data-nama', anggota.nama);
-
-                item.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    searchInput.value = this.getAttribute('data-nama');
-                    selectedAnggotaId.value = this.getAttribute('data-id');
-                    searchResults.innerHTML = ''; // Sembunyikan hasil setelah memilih
+    if (searchInputAdd) {
+        searchInputAdd.addEventListener('input', function() {
+            const query = this.value.toLowerCase();
+            searchResultsAdd.innerHTML = '';
+            if (query.length > 0) {
+                const filteredAnggota = anggotaList.filter(anggota =>
+                    anggota.nama.toLowerCase().includes(query)
+                );
+                filteredAnggota.forEach(anggota => {
+                    const item = document.createElement('a');
+                    item.href = '#';
+                    item.className = 'list-group-item list-group-item-action';
+                    item.textContent = anggota.nama;
+                    item.setAttribute('data-id', anggota.id);
+                    item.setAttribute('data-nama', anggota.nama);
+                    item.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        searchInputAdd.value = this.getAttribute('data-nama');
+                        selectedAnggotaIdAdd.value = this.getAttribute('data-id');
+                        searchResultsAdd.innerHTML = '';
+                    });
+                    searchResultsAdd.appendChild(item);
                 });
+            }
+        });
+    }
 
-                searchResults.appendChild(item);
-            });
+    // --- Skrip BARU untuk Modal EDIT User ---
+    const searchInputEdit = document.getElementById('edit-search-anggota-user');
+    const searchResultsEdit = document.getElementById('edit-search-results-user');
+    const selectedAnggotaIdEdit = document.getElementById('edit-anggota-id-user');
+    const editModal = document.getElementById('editUsersModal');
+
+    if (searchInputEdit) {
+        searchInputEdit.addEventListener('input', function() {
+            const query = this.value.toLowerCase();
+            searchResultsEdit.innerHTML = '';
+            if (query.length > 0) {
+                const filteredAnggota = anggotaList.filter(anggota =>
+                    anggota.nama.toLowerCase().includes(query)
+                );
+                filteredAnggota.forEach(anggota => {
+                    const item = document.createElement('a');
+                    item.href = '#';
+                    item.className = 'list-group-item list-group-item-action';
+                    item.textContent = anggota.nama;
+                    item.setAttribute('data-id', anggota.id);
+                    item.setAttribute('data-nama', anggota.nama);
+                    item.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        searchInputEdit.value = this.getAttribute('data-nama');
+                        selectedAnggotaIdEdit.value = this.getAttribute('data-id');
+                        searchResultsEdit.innerHTML = '';
+                    });
+                    searchResultsEdit.appendChild(item);
+                });
+            }
+        });
+    }
+
+    // Fungsi untuk mengisi data saat tombol edit diklik
+    editModal.addEventListener('show.bs.modal', function (event) {
+        const button = event.relatedTarget;
+        const userData = JSON.parse(button.getAttribute('data-user'));
+        
+        // Mengisi data user yang sudah ada
+        document.getElementById('edit-users-id').value = userData.id;
+        document.getElementById('edit-username').value = userData.username;
+        document.getElementById('edit-role').value = userData.role;
+
+        // Mencari nama anggota berdasarkan ID untuk mengisi kolom pencarian
+        const relatedAnggota = anggotaList.find(a => a.id == userData.anggota_id);
+        if (relatedAnggota) {
+            searchInputEdit.value = relatedAnggota.nama;
+            selectedAnggotaIdEdit.value = relatedAnggota.id;
+        } else {
+            searchInputEdit.value = '';
+            selectedAnggotaIdEdit.value = '';
         }
+        
     });
 });
-</script>
+</script>    
 </body>
 </html>
