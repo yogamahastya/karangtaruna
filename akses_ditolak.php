@@ -11,7 +11,7 @@ $base_url = "http://" . $_SERVER['HTTP_HOST']; // akan otomatis menyesuaikan dom
 </head>
 <body class="d-flex align-items-center justify-content-center" style="min-height: 100vh;">
     <div class="text-center">
-        <h1 class="display-4 text-danger">Akses Ditolak!</h1>
+        <h1 class="display-4 text-danger">Akses Ditolak!!</h1>
         <p class="lead">Anda tidak memiliki izin untuk mengakses halaman ini.</p>
         <a href="<?= $base_url ?>/" class="btn btn-secondary">Kembali ke Beranda</a>
     </div>
