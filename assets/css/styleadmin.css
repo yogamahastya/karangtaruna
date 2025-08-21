@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 :root {
             --primary-color: #0d6efd;
             --light-bg: #f8f9fa;
@@ -148,4 +149,156 @@
             .table-responsive {
                 overflow-x: hidden;
             }
+=======
+:root {
+            --primary-color: #0d6efd;
+            --light-bg: #f8f9fa;
+            --dark-text: #212529;
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            --border-radius: 1.5rem;
+        }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--light-bg);
+            color: var(--dark-text);
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 1200px;
+        }
+        .admin-header {
+            background-color: var(--primary-color);
+            color: #fff;
+            padding: 3rem 0;
+            margin-bottom: 2rem;
+            text-align: center;
+            border-bottom-left-radius: var(--border-radius);
+            border-bottom-right-radius: var(--border-radius);
+        }
+        .nav-pills-custom {
+            background-color: #fff;
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            padding: 0.75rem;
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+        .nav-pills-custom .nav-link {
+            border-radius: calc(var(--border-radius) - 0.5rem);
+            font-weight: 600;
+            color: var(--dark-text);
+            padding: 1rem 1.75rem;
+            transition: all 0.3s ease-in-out;
+            flex-grow: 1;
+            text-align: center;
+            margin: 0.25rem;
+        }
+        .nav-pills-custom .nav-link.active {
+            background-color: var(--primary-color);
+            color: #fff;
+            box-shadow: 0 2px 8px rgba(13, 110, 253, 0.4);
+            transform: translateY(-3px);
+        }
+        .nav-pills-custom .nav-link:hover:not(.active) {
+            background-color: #e9ecef;
+            transform: translateY(-2px);
+        }
+        .content-card {
+            background-color: #fff;
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            padding: 2.5rem;
+            transition: all 0.3s ease;
+        }
+        .table {
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            background-color: #fff;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        }
+        .table thead {
+            background-color: #e9ecef;
+            color: var(--dark-text);
+            font-weight: 600;
+        }
+        .table tbody tr {
+            transition: all 0.2s ease-in-out;
+        }
+        .table tbody tr:hover {
+            background-color: #f1f1f1;
+            transform: scale(1.005);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .table th, .table td {
+            padding: 1.25rem;
+            vertical-align: middle;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .modal-content {
+            border-radius: var(--border-radius);
+        }
+        .btn-action {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+        .btn-action.btn-warning-custom {
+            background-color: #ffc107;
+            border-color: #ffc107;
+            color: #000;
+            border-radius: 50% !important;
+        }
+        .btn-action:hover {
+            transform: scale(1.1);
+        }
+        
+        /* CSS untuk tampilan seluler (Card View) */
+        @media (max-width: 767.98px) {
+            .table-responsive .table {
+                display: none;
+            }
+            .card-item {
+                background: #fff;
+                border: 1px solid #dee2e6;
+                border-radius: 0.75rem;
+                margin-bottom: 1.5rem;
+                padding: 1rem;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            }
+            .card-item div {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: space-between;
+                padding: 0.5rem 0;
+            }
+            .card-item div:not(:last-child) {
+                border-bottom: 1px solid #eee;
+            }
+            .card-item .label {
+                font-weight: 600;
+                color: #6c757d;
+                flex-basis: 40%;
+            }
+            .card-item .value {
+                flex-basis: 60%;
+                text-align: right;
+            }
+            .card-item .btn-group {
+                width: 100%;
+                display: flex;
+                justify-content: flex-end;
+                padding-top: 1rem;
+            }
+            .card-item .btn-action {
+                margin-left: 0.5rem;
+            }
+            .table-responsive {
+                overflow-x: hidden;
+            }
+>>>>>>> 5f6158f27cf4d32e7de55a6ebe447ba9b45dd307
         }
