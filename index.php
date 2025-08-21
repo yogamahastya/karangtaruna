@@ -532,10 +532,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['absen_submit'])) {
 
 <div class="container py-5">
     <header class="hero-section">
-        <h1 class="display-4"><i class="fa-solid fa-people-group me-3"></i><?= ORGANIZATION_NAME ?></h1>
-        <p class="fs-5 mt-3">Satu visi, satu aksi, untuk kemajuan bersama.</p>
-    </header>
-
+    <h1 class="display-4"><i class="fa-solid fa-people-group me-3"></i><?= ORGANIZATION_NAME ?></h1>
+    <p class="fs-5 mt-3">Satu visi, satu aksi, untuk kemajuan bersama.</p>
+</header>
     <div class="mb-5">
         <ul class="nav nav-pills nav-justified nav-pills-custom" id="myTab" role="tablist">
             <li class="nav-item" role="presentation">
@@ -998,7 +997,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['absen_submit'])) {
             <?php else: ?>
                 <h2 class="mb-4 text-primary"><i class="fa-solid fa-receipt me-2"></i>Rekapitulasi Iuran</h2>
                 <div class="row mb-3 gy-2 align-items-center">
-    <div class="col-12 col-md-6">
+        <div class="col-12 col-md-6">
         <form action="" method="GET" class="d-flex align-items-center w-100">
             <input type="hidden" name="tab" value="iuran">
             <label for="year-iuran" class="form-label mb-0 me-2 fw-bold">Pilih Tahun:</label>
@@ -1023,21 +1022,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['absen_submit'])) {
                 <?php endforeach; ?>
             </select>
         </form>
-    </div>
-    <div class="col-12 col-md-6">
-        <form action="" method="GET" class="d-flex w-100 justify-content-end">
-            <input type="hidden" name="tab" value="iuran">
-            <input type="hidden" name="year" value="<?= $selectedYear ?>">
-            <div class="input-group">
-                <input type="text" id="searchInputIuran" class="form-control" placeholder="Cari anggota..." name="search" value="<?= htmlspecialchars($searchTerm) ?>">
-                <button class="btn btn-outline-primary" type="submit"><i class="fas fa-search"></i></button>
-                <?php if (!empty($searchTerm)): ?>
-                    <a href="?tab=iuran&year=<?= $selectedYear ?>" class="btn btn-outline-secondary" title="Hapus Pencarian"><i class="fas fa-times"></i></a>
-                <?php endif; ?>
+        </div>
+            <div class="col-12 col-md-6">
+                <form action="" method="GET" class="d-flex w-100 justify-content-end">
+                    <input type="hidden" name="tab" value="iuran">
+                    <input type="hidden" name="year" value="<?= $selectedYear ?>">
+                    <div class="input-group">
+                        <input type="text" id="searchInputIuran" class="form-control" placeholder="Cari anggota..." name="search" value="<?= htmlspecialchars($searchTerm) ?>">
+                        <button class="btn btn-outline-primary" type="submit"><i class="fas fa-search"></i></button>
+                        <?php if (!empty($searchTerm)): ?>
+                            <a href="?tab=iuran&year=<?= $selectedYear ?>" class="btn btn-outline-secondary" title="Hapus Pencarian"><i class="fas fa-times"></i></a>
+                        <?php endif; ?>
+                    </div>
+                </form>
             </div>
-        </form>
-    </div>
-</div>
+        </div>
                 <div class="table-responsive">
                     <table class="table table-hover table-striped iuran-table">
                         <thead>
@@ -1120,6 +1119,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['absen_submit'])) {
             </nav>
             <?php endif; ?>
         <?php endif; ?>
+        <footer class="text-center mt-5">
+            <div class="copyright-box">
+                <p class="copyright-text" style="font-size: 0.8rem;">
+                    &copy; <?= date('Y') ?> <a href="http://nuxera.my.id" target="_blank" style="color: inherit; text-decoration: none;">nuxera.my.id</a>
+                </p>
+            </div>
+        </footer>
     </div>
 </div>
 
