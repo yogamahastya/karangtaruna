@@ -115,16 +115,16 @@ function fetchDataWithPagination($conn, $tableName, $start, $limit, $searchTerm 
         $searchTermLike = '%' . $searchTerm . '%';
         if ($tableName === 'anggota') {
              // PERBAIKAN: Hapus alias 'a' karena query utama tidak menggunakannya
-             $conditions[] = "(nama_lengkap LIKE ? OR jabatan LIKE ?)";
-             $params[] = $searchTermLike;
-             $params[] = $searchTermLike;
-             $types .= 'ss';
+            $conditions[] = "(nama_lengkap LIKE ? OR jabatan LIKE ?)";
+            $params[] = $searchTermLike;
+            $params[] = $searchTermLike;
+            $types .= 'ss';
         } elseif ($tableName === 'absensi') {
              // PERBAIKAN: Pertahankan alias 'a' karena query utama menggunakannya (JOIN)
-             $conditions[] = "(a.nama_lengkap LIKE ? OR a.jabatan LIKE ?)";
-             $params[] = $searchTermLike;
-             $params[] = $searchTermLike;
-             $types .= 'ss';
+            $conditions[] = "(a.nama_lengkap LIKE ? OR a.jabatan LIKE ?)";
+            $params[] = $searchTermLike;
+            $params[] = $searchTermLike;
+            $types .= 'ss';
         } elseif ($tableName === 'kegiatan') {
             $conditions[] = "(nama_kegiatan LIKE ? OR deskripsi LIKE ? OR lokasi LIKE ?)";
             $params[] = $searchTermLike;
@@ -331,10 +331,10 @@ function countRowsWithFilter($conn, $tableName, $searchTerm = null, $filterYear 
         $searchTermLike = '%' . $searchTerm . '%';
         if ($tableName === 'anggota' || $tableName === 'absensi') {
              // PERBAIKAN: Hapus alias 'a' karena query utama tidak menggunakannya
-             $conditions[] = "(nama_lengkap LIKE ? OR jabatan LIKE ?)";
-             $params[] = $searchTermLike;
-             $params[] = $searchTermLike;
-             $types .= 'ss';
+            $conditions[] = "(nama_lengkap LIKE ? OR jabatan LIKE ?)";
+            $params[] = $searchTermLike;
+            $params[] = $searchTermLike;
+            $types .= 'ss';
         } elseif ($tableName === 'kegiatan') {
             $conditions[] = "(nama_kegiatan LIKE ? OR deskripsi LIKE ? OR lokasi LIKE ?)";
             $params[] = $searchTermLike;
@@ -355,9 +355,9 @@ function countRowsWithFilter($conn, $tableName, $searchTerm = null, $filterYear 
     }
     if (!empty($conditions)) {
         if (strpos($sql, 'WHERE') === false) {
-             $sql .= " WHERE " . implode(" AND ", $conditions);
+            $sql .= " WHERE " . implode(" AND ", $conditions);
         } else {
-             $sql .= " AND " . implode(" AND ", $conditions);
+            $sql .= " AND " . implode(" AND ", $conditions);
         }
     }
     $stmt = $conn->prepare($sql);
@@ -420,7 +420,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['absen_submit'])) {
     }
 
     // --- Cooldown (Rate Limiting) ---
-    $cooldownSeconds = 30;
+    $cooldownSeconds = 43200;
     $canProceed = true;
     
     $stmt = $conn->prepare("SELECT last_attempt_time FROM ip_attendance_cooldown WHERE ip_address = ?");
@@ -573,19 +573,31 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['absen_submit'])) {
     <div class="content-card">
         <?php if ($active_tab == 'anggota'): ?>
             <h2 class="mb-4 text-primary"><i class="fa-solid fa-user-group me-2"></i>Data Anggota</h2>
-            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
-                <p class="fs-5 mb-0">Total Anggota: <span class="badge bg-primary"><?= $total_anggota ?></span></p>
-                <form action="" method="GET" class="d-inline-flex">
-                    <input type="hidden" name="tab" value="anggota">
-                    <div class="input-group">
-                        <input type="text" class="form-control" placeholder="Cari anggota..." name="search" value="<?= htmlspecialchars($searchTerm) ?>">
-                        <button class="btn btn-outline-primary" type="submit"><i class="fas fa-search"></i></button>
-                        <?php if (!empty($searchTerm)): ?>
-                            <a href="?tab=anggota" class="btn btn-outline-secondary" title="Hapus Pencarian"><i class="fas fa-times"></i></a>
-                        <?php endif; ?>
-                    </div>
-                </form>
+            <div class="row mb-3 align-items-center gy-2">
+                <div class="col-12 col-md-4">
+                    <p class="fs-5 mb-0">Total Anggota: <span class="badge bg-primary"><?= $total_anggota ?></span></p>
+                </div>
+                <div class="col-12 col-md-8 text-md-end">
+                    <form action="" method="GET" class="d-flex justify-content-start justify-content-md-end">
+                        <input type="hidden" name="tab" value="anggota">
+                        <div class="input-group search-input-desktop">
+                            <input type="text" class="form-control" placeholder="Cari anggota..." name="search" value="<?= htmlspecialchars($searchTerm) ?>">
+                            <button class="btn btn-outline-primary" type="submit"><i class="fas fa-search"></i></button>
+                            <?php if (!empty($searchTerm)): ?>
+                                <a href="?tab=anggota" class="btn btn-outline-secondary" title="Hapus Pencarian"><i class="fas fa-times"></i></a>
+                            <?php endif; ?>
+                        </div>
+                    </form>
+                </div>
             </div>
+            <style>
+                /* CSS Kustom untuk mengontrol lebar di desktop */
+                @media (min-width: 768px) {
+                    .search-input-desktop {
+                        max-width: 300px;
+                    }
+                }
+            </style>
             <div class="table-responsive">
                 <table class="table table-hover table-striped" id="anggotaTable">
                     <thead>
@@ -629,25 +641,25 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['absen_submit'])) {
             </nav>
         <?php elseif ($active_tab == 'absensi'): ?>
             <h2 class="mb-4 text-primary"><i class="fa-solid fa-user-check me-2"></i>Absensi Perkumpulan Hari Ini</h2>
-            <div class="row mb-3 align-items-center">
-                <div class="col-md-6">
+            <div class="row mb-3 gy-2 align-items-center">
+                <div class="col-12 col-md-6">
                     <div class="alert alert-info mb-0" role="alert">
                         <i class="fa-solid fa-location-dot me-2"></i> Pilih nama Anda untuk absen. Pastikan GPS aktif.
                     </div>
                 </div>
-                <div class="col-md-6 text-end">
-                    <form action="" method="GET" class="d-inline-flex">
+                <div class="col-12 col-md-6">
+                    <form action="" method="GET" class="d-flex w-100 justify-content-end">
                         <input type="hidden" name="tab" value="absensi">
                         <div class="input-group">
                             <input type="text" class="form-control" placeholder="Cari anggota..." name="search" value="<?= htmlspecialchars($searchTerm) ?>">
                             <button class="btn btn-outline-primary" type="submit"><i class="fas fa-search"></i></button>
                             <?php if (!empty($searchTerm)): ?>
                                 <a href="?tab=absensi" class="btn btn-outline-secondary" title="Hapus Pencarian"><i class="fas fa-times"></i></a>
-                        <?php endif; ?>
-                    </div>
-                </form>
+                            <?php endif; ?>
+                        </div>
+                    </form>
+                </div>
             </div>
-        </div>
             <?php if (!empty($message)): ?>
                 <div class="alert alert-<?= $messageType ?> mt-3 mb-4" role="alert">
                     <?= $message ?>
@@ -760,12 +772,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['absen_submit'])) {
             </script>
         <?php elseif ($active_tab == 'kegiatan'): ?>
             <h2 class="mb-4 text-primary"><i class="fa-solid fa-calendar-alt me-2"></i>Daftar Kegiatan</h2>
-            <div class="row mb-3 align-items-center">
-                <div class="col-md-6">
+            <div class="row mb-3 gy-2 align-items-center">
+                <div class="col-12 col-md-6">
                     <p class="fs-5 mb-0">Total Kegiatan: <span class="badge bg-primary"><?= $total_kegiatan ?></span></p>
                 </div>
-                <div class="col-md-6 text-end">
-                    <form action="" method="GET" class="d-inline-flex">
+                <div class="col-12 col-md-6">
+                    <form action="" method="GET" class="d-flex w-100 justify-content-end">
                         <input type="hidden" name="tab" value="kegiatan">
                         <div class="input-group">
                             <input type="text" class="form-control" placeholder="Cari kegiatan..." name="search" value="<?= htmlspecialchars($searchTerm) ?>">
@@ -820,35 +832,35 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['absen_submit'])) {
             </nav>
         <?php elseif ($active_tab == 'keuangan'): ?>
             <h2 class="mb-4 text-primary"><i class="fa-solid fa-wallet me-2"></i>Laporan Keuangan</h2>
-            <div class="row mb-3 align-items-center">
-                <div class="col-md-6">
-                    <form action="" method="GET" class="d-flex align-items-center">
+            <div class="row mb-3 gy-2 align-items-center">
+                <div class="col-12 col-md-6">
+                    <form action="" method="GET" class="d-flex align-items-center w-100">
                         <input type="hidden" name="tab" value="keuangan">
                         <label for="year-keuangan" class="form-label mb-0 me-2 fw-bold">Pilih Tahun:</label>
                         <select class="form-select w-auto" id="year-keuangan" name="year" onchange="this.form.submit()">
-                            <?php 
-                                $currentYear = date('Y');
-                                $resultYears = $conn->query("SELECT DISTINCT YEAR(tanggal_transaksi) AS year FROM keuangan ORDER BY year DESC");
-                                $years = [];
-                                if ($resultYears) {
-                                    while ($row = $resultYears->fetch_assoc()) {
-                                        $years[] = $row['year'];
-                                    }
+                            <?php
+                            $currentYear = date('Y');
+                            $resultYears = $conn->query("SELECT DISTINCT YEAR(tanggal_transaksi) AS year FROM keuangan ORDER BY year DESC");
+                            $years = [];
+                            if ($resultYears) {
+                                while ($row = $resultYears->fetch_assoc()) {
+                                    $years[] = $row['year'];
                                 }
-                                if (!in_array($currentYear, $years)) {
-                                    $years[] = $currentYear;
-                                    rsort($years);
-                                }
-                                
-                                foreach ($years as $year):
+                            }
+                            if (!in_array($currentYear, $years)) {
+                                $years[] = $currentYear;
+                                rsort($years);
+                            }
+
+                            foreach ($years as $year):
                             ?>
                                 <option value="<?= $year ?>" <?= ($year == $selectedYear) ? 'selected' : '' ?>><?= $year ?></option>
                             <?php endforeach; ?>
                         </select>
                     </form>
                 </div>
-                <div class="col-md-6 text-end">
-                    <form action="" method="GET" class="d-inline-flex">
+                <div class="col-12 col-md-6">
+                    <form action="" method="GET" class="d-flex w-100 justify-content-end">
                         <input type="hidden" name="tab" value="keuangan">
                         <input type="hidden" name="year" value="<?= $selectedYear ?>">
                         <div class="input-group">
@@ -985,47 +997,47 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['absen_submit'])) {
                 </div>
             <?php else: ?>
                 <h2 class="mb-4 text-primary"><i class="fa-solid fa-receipt me-2"></i>Rekapitulasi Iuran</h2>
-                <div class="row mb-3 align-items-center">
-                    <div class="col-md-6">
-                        <form action="" method="GET" class="d-flex align-items-center">
-                            <input type="hidden" name="tab" value="iuran">
-                            <label for="year-iuran" class="form-label mb-0 me-2 fw-bold">Pilih Tahun:</label>
-                            <select class="form-select w-auto" id="year-iuran" name="year" onchange="this.form.submit()">
-                                <?php 
-                                    $currentYear = date('Y');
-                                    $resultYears = $conn->query("SELECT DISTINCT YEAR(tanggal_bayar) AS year FROM iuran ORDER BY year DESC");
-                                    $years = [];
-                                    if ($resultYears) {
-                                        while ($row = $resultYears->fetch_assoc()) {
-                                            $years[] = $row['year'];
-                                        }
-                                    }
-                                    if (!in_array($currentYear, $years)) {
-                                        $years[] = $currentYear;
-                                        rsort($years);
-                                    }
-                                    
-                                    foreach ($years as $year):
-                                ?>
-                                    <option value="<?= $year ?>" <?= ($year == $selectedYear) ? 'selected' : '' ?>><?= $year ?></option>
-                                <?php endforeach; ?>
-                            </select>
-                        </form>
-                    </div>
-                    <div class="col-md-6 text-end">
-                        <form action="" method="GET" class="d-inline-flex">
-                            <input type="hidden" name="tab" value="iuran">
-                            <input type="hidden" name="year" value="<?= $selectedYear ?>">
-                            <div class="input-group">
-                                <input type="text" id="searchInputIuran" class="form-control" placeholder="Cari anggota..." name="search" value="<?= htmlspecialchars($searchTerm) ?>">
-                                <button class="btn btn-outline-primary" type="submit"><i class="fas fa-search"></i></button>
-                                <?php if (!empty($searchTerm)): ?>
-                                    <a href="?tab=iuran&year=<?= $selectedYear ?>" class="btn btn-outline-secondary" title="Hapus Pencarian"><i class="fas fa-times"></i></a>
-                                <?php endif; ?>
-                            </div>
-                        </form>
-                    </div>
-                </div>
+                <div class="row mb-3 gy-2 align-items-center">
+    <div class="col-12 col-md-6">
+        <form action="" method="GET" class="d-flex align-items-center w-100">
+            <input type="hidden" name="tab" value="iuran">
+            <label for="year-iuran" class="form-label mb-0 me-2 fw-bold">Pilih Tahun:</label>
+            <select class="form-select w-auto" id="year-iuran" name="year" onchange="this.form.submit()">
+                <?php
+                $currentYear = date('Y');
+                $resultYears = $conn->query("SELECT DISTINCT YEAR(tanggal_bayar) AS year FROM iuran ORDER BY year DESC");
+                $years = [];
+                if ($resultYears) {
+                    while ($row = $resultYears->fetch_assoc()) {
+                        $years[] = $row['year'];
+                    }
+                }
+                if (!in_array($currentYear, $years)) {
+                    $years[] = $currentYear;
+                    rsort($years);
+                }
+
+                foreach ($years as $year):
+                ?>
+                    <option value="<?= $year ?>" <?= ($year == $selectedYear) ? 'selected' : '' ?>><?= $year ?></option>
+                <?php endforeach; ?>
+            </select>
+        </form>
+    </div>
+    <div class="col-12 col-md-6">
+        <form action="" method="GET" class="d-flex w-100 justify-content-end">
+            <input type="hidden" name="tab" value="iuran">
+            <input type="hidden" name="year" value="<?= $selectedYear ?>">
+            <div class="input-group">
+                <input type="text" id="searchInputIuran" class="form-control" placeholder="Cari anggota..." name="search" value="<?= htmlspecialchars($searchTerm) ?>">
+                <button class="btn btn-outline-primary" type="submit"><i class="fas fa-search"></i></button>
+                <?php if (!empty($searchTerm)): ?>
+                    <a href="?tab=iuran&year=<?= $selectedYear ?>" class="btn btn-outline-secondary" title="Hapus Pencarian"><i class="fas fa-times"></i></a>
+                <?php endif; ?>
+            </div>
+        </form>
+    </div>
+</div>
                 <div class="table-responsive">
                     <table class="table table-hover table-striped iuran-table">
                         <thead>
