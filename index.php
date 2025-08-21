@@ -1131,9 +1131,5 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['absen_submit'])) {
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-<<<<<<< HEAD
-</html>
-=======
 </html>
 
->>>>>>> 5f6158f27cf4d32e7de55a6ebe447ba9b45dd307
