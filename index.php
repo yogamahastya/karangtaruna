@@ -527,6 +527,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['absen_submit'])) {
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="assets/css/styleindex.css"> 
+    <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
 
@@ -611,7 +612,42 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['absen_submit'])) {
                             <?php foreach ($anggota as $row): ?>
                                 <tr>
                                     <td data-label="Nama Lengkap"><i class="fa-solid fa-user-circle me-2"></i><?= htmlspecialchars($row['nama_lengkap']) ?></td>
-                                    <td data-label="Jabatan"><?= htmlspecialchars($row['jabatan']) ?></td>
+                                    <td data-label="Jabatan">
+                                        <?php
+                                            $jabatan = htmlspecialchars($row['jabatan']);
+                                            $badge_class = '';
+
+                                            // Tentukan kelas CSS berdasarkan nilai jabatan
+                                            switch (strtolower($jabatan)) {
+                                                case 'ketua':
+                                                    $badge_class = 'ketua';
+                                                    break;
+                                                case 'wakil ketua':
+                                                    $badge_class = 'wakilketua';
+                                                    break;
+                                                case 'sekretaris':
+                                                    $badge_class = 'sekretaris';
+                                                    break;
+                                                case 'bendahara':
+                                                    $badge_class = 'bendahara';
+                                                    break;
+                                                case 'anggota':
+                                                    $badge_class = 'anggota';
+                                                    break;
+                                                case 'humas':
+                                                    $badge_class = 'humas';
+                                                    break;
+                                                default:
+                                                    // Jika jabatan tidak dikenali, tidak perlu menambahkan kelas badge
+                                                    $badge_class = '';
+                                                    break;
+                                            }
+                                        ?>
+
+                                        <span class="badge <?= $badge_class ?>">
+                                            <?= $jabatan ?>
+                                        </span>
+                                    </td>
                                     <td data-label="Bergabung Sejak"><?= htmlspecialchars($row['bergabung_sejak']) ?></td>
                                 </tr>
                             <?php endforeach; ?>

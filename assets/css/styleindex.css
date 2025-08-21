@@ -172,9 +172,9 @@
                 font-weight: 600;
                 color: #6c757d;
             }
-
             /* Perbaikan untuk baris terakhir di tabel Iuran */
             .table-responsive .table.iuran-table td:last-child {
                 text-align: right; /* Pastikan badge tetap di kanan */
             }
         }
+            
