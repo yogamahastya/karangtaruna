@@ -1,3 +1,7 @@
+<?php
+// Tentukan base URL secara otomatis
+$base_url = "http://" . $_SERVER['HTTP_HOST']; // akan otomatis menyesuaikan domain atau localhost
+?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -9,8 +13,7 @@
     <div class="text-center">
         <h1 class="display-4 text-danger">Akses Ditolak!</h1>
         <p class="lead">Anda tidak memiliki izin untuk mengakses halaman ini.</p>
-        <a href="login.php" class="btn btn-primary">Kembali ke Login</a>
-        <a href="index.php" class="btn btn-secondary">Kembali ke Beranda</a>
+        <a href="<?= $base_url ?>/" class="btn btn-secondary">Kembali ke Beranda</a>
     </div>
 </body>
 </html>
