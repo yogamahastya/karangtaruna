@@ -537,12 +537,12 @@ if ($result_lokasi && $result_lokasi->num_rows > 0) {
     <div class="content-card">
         <?php if ($active_tab == 'anggota'): ?>
             <h2 class="mb-4 text-primary"><i class="fa-solid fa-user-group me-2"></i>Kelola Data Anggota</h2>
-            <div class="row mb-3 align-items-center">
-                <div class="col-md-6">
+            <div class="row mb-3 gy-2 align-items-center">
+                <div class="col-12 col-md-4">
                     <p class="fs-5 mb-0">Total Anggota: <span class="badge bg-primary"><?= $totalAnggota ?></span></p>
                 </div>
-                <div class="col-md-6 text-end">
-                    <form action="" method="GET" class="d-inline-flex">
+                <div class="col-12 col-md-4">
+                    <form action="" method="GET" class="d-flex w-100">
                         <input type="hidden" name="tab" value="anggota">
                         <div class="input-group">
                             <input type="text" class="form-control" placeholder="Cari anggota..." name="search" value="<?= htmlspecialchars($searchTerm) ?>">
@@ -553,10 +553,12 @@ if ($result_lokasi && $result_lokasi->num_rows > 0) {
                         </div>
                     </form>
                 </div>
+                <div class="col-12 col-md-4 text-md-end">
+                    <button type="button" class="btn btn-primary w-100 w-md-auto" data-bs-toggle="modal" data-bs-target="#addAnggotaModal">
+                        <i class="fa-solid fa-plus-circle me-2"></i> Tambah Anggota
+                    </button>
+                </div>
             </div>
-            <button type="button" class="btn btn-primary mb-4" data-bs-toggle="modal" data-bs-target="#addAnggotaModal">
-                <i class="fa-solid fa-plus-circle me-2"></i> Tambah Anggota
-            </button>
             <div class="table-responsive">
                 <table class="table table-hover table-striped d-none d-md-table">
                     <thead>
@@ -671,9 +673,9 @@ if ($result_lokasi && $result_lokasi->num_rows > 0) {
             <?php endif; ?>
         <?php elseif ($active_tab == 'kegiatan'): ?>
             <h2 class="mb-4 text-primary"><i class="fa-solid fa-calendar-alt me-2"></i>Kelola Data Kegiatan</h2>
-            <div class="row mb-3">
-                <div class="col-md-12 text-end">
-                    <form action="" method="GET" class="d-inline-flex">
+            <div class="row mb-3 gy-2 align-items-center">
+                <div class="col-12 col-md-6">
+                    <form action="" method="GET" class="d-flex w-100">
                         <input type="hidden" name="tab" value="kegiatan">
                         <div class="input-group">
                             <input type="text" class="form-control" placeholder="Cari kegiatan..." name="search" value="<?= htmlspecialchars($searchTerm) ?>">
@@ -684,10 +686,12 @@ if ($result_lokasi && $result_lokasi->num_rows > 0) {
                         </div>
                     </form>
                 </div>
+                <div class="col-12 col-md-6 text-md-end">
+                    <button type="button" class="btn btn-primary w-100 w-md-auto" data-bs-toggle="modal" data-bs-target="#addKegiatanModal">
+                        <i class="fa-solid fa-plus-circle me-2"></i> Tambah Kegiatan
+                    </button>
+                </div>
             </div>
-            <button type="button" class="btn btn-primary mb-4" data-bs-toggle="modal" data-bs-target="#addKegiatanModal">
-                <i class="fa-solid fa-plus-circle me-2"></i> Tambah Kegiatan
-            </button>
             <div class="table-responsive">
                 <table class="table table-hover table-striped d-none d-md-table">
                     <thead>
@@ -807,27 +811,32 @@ if ($result_lokasi && $result_lokasi->num_rows > 0) {
             <?php endif; ?>
         <?php elseif ($active_tab == 'keuangan'): ?>
             <h2 class="mb-4 text-primary"><i class="fa-solid fa-wallet me-2"></i>Kelola Laporan Keuangan</h2>
-            <div class="row mb-3">
-                <div class="col-md-6">
+            <div class="row mb-3 gy-2 align-items-center">
+                <div class="col-12 col-md-6">
                     <div class="input-group">
                         <span class="input-group-text"><i class="fa-solid fa-calendar-alt"></i></span>
                         <select class="form-select" onchange="window.location.href = '?tab=<?= $active_tab ?>&year=' + this.value + '<?= !empty($searchTerm) ? '&search=' . urlencode($searchTerm) : '' ?>'">
                             <?php
+                            // Asumsi $conn sudah didefinisikan dan terkoneksi ke database
+                            // Query untuk mendapatkan tahun minimum dari database
                             $minYearQuery = "SELECT MIN(YEAR(tanggal_transaksi)) AS min_year FROM keuangan";
                             $minYearResult = $conn->query($minYearQuery);
                             $minYearRow = $minYearResult->fetch_assoc();
+                            // Jika tidak ada data, gunakan tahun saat ini sebagai tahun minimum
                             $minYear = $minYearRow['min_year'] ? $minYearRow['min_year'] : date('Y');
+                            // Asumsi $selectedYear sudah didefinisikan (misal dari $_GET['year'])
+                            // Loop untuk membuat opsi tahun dari tahun sekarang sampai tahun minimum
                             for ($year = date('Y'); $year >= $minYear; $year--):
                             ?>
                                 <option value="<?= $year ?>" <?= ($year == $selectedYear) ? 'selected' : '' ?>>
-                                    Tahun <?= $year ?>
+                                    <?= $year ?>
                                 </option>
                             <?php endfor; ?>
                         </select>
                     </div>
                 </div>
-                <div class="col-md-6 text-end">
-                    <form action="" method="GET" class="d-inline-flex">
+                <div class="col-12 col-md-6">
+                    <form action="" method="GET" class="d-flex w-100">
                         <input type="hidden" name="tab" value="keuangan">
                         <input type="hidden" name="year" value="<?= $selectedYear ?>">
                         <div class="input-group">
@@ -840,8 +849,9 @@ if ($result_lokasi && $result_lokasi->num_rows > 0) {
                     </form>
                 </div>
             </div>
-            <div class="row mb-4">
-                <div class="col-md-4">
+
+            <div class="row mb-4 gy-3">
+                <div class="col-12 col-md-4">
                     <div class="card text-white bg-success">
                         <div class="card-body">
                             <h5 class="card-title">Total Pemasukan</h5>
@@ -849,7 +859,7 @@ if ($result_lokasi && $result_lokasi->num_rows > 0) {
                         </div>
                     </div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-12 col-md-4">
                     <div class="card text-white bg-danger">
                         <div class="card-body">
                             <h5 class="card-title">Total Pengeluaran</h5>
@@ -857,7 +867,7 @@ if ($result_lokasi && $result_lokasi->num_rows > 0) {
                         </div>
                     </div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-12 col-md-4">
                     <div class="card text-white bg-primary">
                         <div class="card-body">
                             <h5 class="card-title">Sisa Saldo</h5>
@@ -866,9 +876,14 @@ if ($result_lokasi && $result_lokasi->num_rows > 0) {
                     </div>
                 </div>
             </div>
-            <button type="button" class="btn btn-primary mb-4" data-bs-toggle="modal" data-bs-target="#addKeuanganModal">
-                <i class="fa-solid fa-plus-circle me-2"></i> Tambah Transaksi
-            </button>
+
+            <div class="row mb-3">
+                <div class="col-12 text-md-end">
+                    <button type="button" class="btn btn-primary w-100 w-md-auto" data-bs-toggle="modal" data-bs-target="#addKeuanganModal">
+                        <i class="fa-solid fa-plus-circle me-2"></i> Tambah Transaksi
+                    </button>
+                </div>
+            </div>
             <div class="table-responsive">
                 <table class="table table-hover table-striped d-none d-md-table">
                     <thead>
@@ -1003,27 +1018,29 @@ if ($result_lokasi && $result_lokasi->num_rows > 0) {
             <?php endif; ?>
         <?php elseif ($active_tab == 'iuran'): ?>
             <h2 class="mb-4 text-primary"><i class="fa-solid fa-receipt me-2"></i>Kelola Data Iuran</h2>
-            <div class="row mb-3">
-                <div class="col-md-6">
+            <div class="row mb-3 gy-2 align-items-center">
+                <div class="col-12 col-md-6">
                     <div class="input-group">
                         <span class="input-group-text"><i class="fa-solid fa-calendar-alt"></i></span>
                         <select class="form-select" onchange="window.location.href = '?tab=<?= $active_tab ?>&year=' + this.value + '<?= !empty($searchTerm) ? '&search=' . urlencode($searchTerm) : '' ?>'">
                             <?php
+                            // Query untuk mendapatkan tahun minimum dari database
                             $minYearQuery = "SELECT MIN(YEAR(tanggal_bayar)) AS min_year FROM iuran";
                             $minYearResult = $conn->query($minYearQuery);
                             $minYearRow = $minYearResult->fetch_assoc();
+                            // Jika tidak ada data, gunakan tahun saat ini
                             $minYear = $minYearRow['min_year'] ? $minYearRow['min_year'] : date('Y');
                             for ($year = date('Y'); $year >= $minYear; $year--):
                             ?>
                                 <option value="<?= $year ?>" <?= ($year == $selectedYear) ? 'selected' : '' ?>>
-                                    Tahun <?= $year ?>
+                                    <?= $year ?>
                                 </option>
                             <?php endfor; ?>
                         </select>
                     </div>
                 </div>
-                <div class="col-md-6 text-end">
-                    <form action="" method="GET" class="d-inline-flex">
+                <div class="col-12 col-md-6">
+                    <form action="" method="GET" class="d-flex w-100">
                         <input type="hidden" name="tab" value="iuran">
                         <input type="hidden" name="year" value="<?= $selectedYear ?>">
                         <div class="input-group">
@@ -1036,8 +1053,9 @@ if ($result_lokasi && $result_lokasi->num_rows > 0) {
                     </form>
                 </div>
             </div>
-            <div class="row mb-4">
-                <div class="col-md-4">
+
+            <div class="row mb-4 gy-3">
+                <div class="col-12 col-md-4">
                     <div class="card text-white bg-info">
                         <div class="card-body">
                             <h5 class="card-title">Total Pemasukan Iuran</h5>
@@ -1046,14 +1064,19 @@ if ($result_lokasi && $result_lokasi->num_rows > 0) {
                     </div>
                 </div>
             </div>
-            <button type="button" class="btn btn-primary mb-4" data-bs-toggle="modal" data-bs-target="#addIuranModal">
-                <i class="fa-solid fa-plus-circle me-2"></i> Tambah Pembayaran Iuran
-            </button>
+
+            <div class="row mb-3">
+                <div class="col-12 text-md-end">
+                    <button type="button" class="btn btn-primary w-100 w-md-auto" data-bs-toggle="modal" data-bs-target="#addIuranModal">
+                        <i class="fa-solid fa-plus-circle me-2"></i> Tambah Pembayaran Iuran
+                    </button>
+                </div>
+            </div>
             <div class="table-responsive">
                 <table class="table table-hover table-striped d-none d-md-table">
                     <thead>
                         <tr>
-                            <th scope="col">ID</th>
+                        
                             <th scope="col">ID Anggota</th>
                             <th scope="col">Nama Anggota</th>
                             <th scope="col">Tanggal Bayar</th>
@@ -1139,10 +1162,7 @@ if ($result_lokasi && $result_lokasi->num_rows > 0) {
                             }
                             ?>
                             <div class="card-item">
-                                <div>
-                                    <span class="label">ID</span>
-                                    <span class="value"><?= htmlspecialchars($row['id']) ?></span>
-                                </div>
+                                
                                 <div>
                                     <span class="label">ID Anggota</span>
                                     <span class="value"><?= htmlspecialchars($row['anggota_id']) ?></span>
@@ -1196,9 +1216,9 @@ if ($result_lokasi && $result_lokasi->num_rows > 0) {
             <?php endif; ?>
             <?php elseif ($active_tab == 'users'): ?>
                 <h2 class="mb-4 text-primary"><i class="fa-solid fa-user-circle me-2"></i>Kelola Data Users</h2>
-                <div class="row mb-3">
-                    <div class="col-md-12 text-end">
-                        <form action="" method="GET" class="d-inline-flex">
+                <div class="row mb-3 gy-2 align-items-center">
+                    <div class="col-12 col-md-6">
+                        <form action="" method="GET" class="d-flex w-100">
                             <input type="hidden" name="tab" value="users">
                             <div class="input-group">
                                 <input type="text" class="form-control" placeholder="Cari user..." name="search" value="<?= htmlspecialchars($searchTerm) ?>">
@@ -1209,13 +1229,15 @@ if ($result_lokasi && $result_lokasi->num_rows > 0) {
                             </div>
                         </form>
                     </div>
+                    <div class="col-12 col-md-6 text-md-end d-flex flex-column flex-md-row justify-content-md-end">
+                        <button type="button" class="btn btn-primary w-100 w-md-auto mb-2 mb-md-0 me-md-2" data-bs-toggle="modal" data-bs-target="#addUsersModal">
+                            <i class="fa-solid fa-plus-circle me-2"></i> Tambah User
+                        </button>
+                        <button type="button" class="btn btn-primary w-100 w-md-auto" data-bs-toggle="modal" data-bs-target="#addLokasiModal">
+                            <i class="fa-solid fa-map-marker-alt me-2"></i> Atur Lokasi Absensi
+                        </button>
+                    </div>
                 </div>
-                <button type="button" class="btn btn-primary mb-4" data-bs-toggle="modal" data-bs-target="#addUsersModal">
-                    <i class="fa-solid fa-plus-circle me-2"></i> Tambah User
-                </button>
-                <button type="button" class="btn btn-primary mb-4" data-bs-toggle="modal" data-bs-target="#addLokasiModal">
-                    <i class="fa-solid fa-map-marker-alt me-2"></i> Atur Lokasi Absensi
-                </button>
                 <div class="table-responsive">
                     <table class="table table-hover table-striped d-none d-md-table">
                         <thead>
@@ -1803,91 +1825,8 @@ if ($result_lokasi && $result_lokasi->num_rows > 0) {
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Logika untuk mengisi data modal Edit Anggota
-        var editAnggotaModal = document.getElementById('editAnggotaModal');
-        editAnggotaModal.addEventListener('show.bs.modal', function(event) {
-            var button = event.relatedTarget;
-            var id = button.getAttribute('data-id');
-            var nama = button.getAttribute('data-nama');
-            var jabatan = button.getAttribute('data-jabatan');
-            var sejak = button.getAttribute('data-sejak');
-            var modal = this;
-            modal.querySelector('#edit-anggota-id').value = id;
-            modal.querySelector('#edit-nama-lengkap').value = nama;
-            modal.querySelector('#edit-jabatan').value = jabatan;
-            modal.querySelector('#edit-bergabung-sejak').value = sejak;
-        });
+<script src="../assets/js/admin.js"></script>
 
-        // Logika untuk mengisi data modal Edit Kegiatan
-        var editKegiatanModal = document.getElementById('editKegiatanModal');
-        editKegiatanModal.addEventListener('show.bs.modal', function(event) {
-            var button = event.relatedTarget;
-            var id = button.getAttribute('data-id');
-            var nama = button.getAttribute('data-nama');
-            var deskripsi = button.getAttribute('data-deskripsi');
-            var lokasi = button.getAttribute('data-lokasi');
-            var tanggal = button.getAttribute('data-tanggal');
-            var modal = this;
-            modal.querySelector('#edit-kegiatan-id').value = id;
-            modal.querySelector('#edit-nama-kegiatan').value = nama;
-            modal.querySelector('#edit-deskripsi').value = deskripsi;
-            modal.querySelector('#edit-lokasi').value = lokasi;
-            modal.querySelector('#edit-tanggal-mulai').value = tanggal;
-        });
-
-        // Logika untuk mengisi data modal Edit Keuangan
-        var editKeuanganModal = document.getElementById('editKeuanganModal');
-        editKeuanganModal.addEventListener('show.bs.modal', function(event) {
-            var button = event.relatedTarget;
-            var id = button.getAttribute('data-id');
-            var jenis = button.getAttribute('data-jenis');
-            var jumlah = button.getAttribute('data-jumlah');
-            var deskripsi = button.getAttribute('data-deskripsi');
-            var tanggal = button.getAttribute('data-tanggal');
-            var modal = this;
-            modal.querySelector('#edit-keuangan-id').value = id;
-            modal.querySelector('#edit-jenis-transaksi').value = jenis;
-            modal.querySelector('#edit-jumlah-keuangan').value = jumlah;
-            modal.querySelector('#edit-deskripsi-keuangan').value = deskripsi;
-            modal.querySelector('#edit-tanggal-transaksi').value = tanggal;
-        });
-
-        // Logika untuk mengisi data modal Edit Iuran
-        var editIuranModal = document.getElementById('editIuranModal');
-        editIuranModal.addEventListener('show.bs.modal', function(event) {
-            var button = event.relatedTarget;
-            var id = button.getAttribute('data-id');
-            var anggotaId = button.getAttribute('data-anggota-id');
-            var tanggal = button.getAttribute('data-tanggal');
-            var jumlah = button.getAttribute('data-jumlah');
-            var keterangan = button.getAttribute('data-keterangan');
-            var modal = this;
-            modal.querySelector('#edit-iuran-id').value = id;
-            modal.querySelector('#edit-anggota-id').value = anggotaId;
-            modal.querySelector('#edit-tanggal-bayar').value = tanggal;
-            modal.querySelector('#edit-jumlah-iuran').value = jumlah;
-            modal.querySelector('#edit-keterangan').value = keterangan;
-        });
-
-        // Logika untuk mengisi data modal Edit Users
-        var editUsersModal = document.getElementById('editUsersModal');
-        editUsersModal.addEventListener('show.bs.modal', function(event) {
-            var button = event.relatedTarget;
-            var id = button.getAttribute('data-id');
-            var username = button.getAttribute('data-username');
-            var role = button.getAttribute('data-role');
-            var anggotaId = button.getAttribute('data-anggota-id');
-            var modal = this;
-            modal.querySelector('#edit-users-id').value = id;
-            modal.querySelector('#edit-username').value = username;
-            modal.querySelector('#edit-role').value = role;
-            modal.querySelector('#edit-anggota-id-user').value = anggotaId;
-            modal.querySelector('#edit-password').value = ''; // Kosongkan password untuk keamanan
-        });
-    });
-</script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         // Ambil daftar anggota dari PHP dan konversi ke JavaScript
@@ -1953,135 +1892,6 @@ if ($result_lokasi && $result_lokasi->num_rows > 0) {
                 searchResultsDiv.style.display = 'none';
             }
         });
-    });
-</script>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const detectBtn = document.getElementById('detect-coords-btn');
-        const gmapsUrlInput = document.getElementById('gmaps-url');
-        const latitudeInput = document.getElementById('lokasi_latitude');
-        const longitudeInput = document.getElementById('lokasi_longitude');
-
-        detectBtn.addEventListener('click', function() {
-            const gmapsUrl = gmapsUrlInput.value;
-            const regex = /@(-?\d+\.\d+),(-?\d+\.\d+)/;
-            const match = gmapsUrl.match(regex);
-            
-            let message = "";
-            let isSuccess = false;
-
-            if (match && match.length >= 3) {
-                const lat = match[1];
-                const lon = match[2];
-
-                latitudeInput.value = lat;
-                longitudeInput.value = lon;
-                
-                message = "Koordinat berhasil dideteksi dan diisi.";
-                isSuccess = true;
-            } else {
-                message = "Tautan Google Maps tidak valid. Pastikan tautan memiliki format yang benar.";
-                isSuccess = false;
-            }
-
-            // Tampilkan notifikasi toast
-            const toastContainer = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            toast.className = `toast align-items-center text-white ${isSuccess ? 'bg-success' : 'bg-danger'} border-0`;
-            toast.setAttribute('role', 'alert');
-            toast.setAttribute('aria-live', 'assertive');
-            toast.setAttribute('aria-atomic', 'true');
-            toast.innerHTML = `
-                <div class="d-flex">
-                    <div class="toast-body">${message}</div>
-                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-                </div>
-            `;
-            toastContainer.appendChild(toast);
-            const bootstrapToast = new bootstrap.Toast(toast);
-            bootstrapToast.show();
-        });
-    });
-</script>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const detectDeviceLocationBtn = document.getElementById('detect-device-location-btn');
-        const latitudeInput = document.getElementById('lokasi_latitude');
-        const longitudeInput = document.getElementById('lokasi_longitude');
-        const toastContainer = document.getElementById('toast-container'); // Pastikan ini ada di HTML Anda
-
-        detectDeviceLocationBtn.addEventListener('click', function() {
-            // Periksa apakah browser mendukung Geolocation API
-            if (navigator.geolocation) {
-                // Tampilkan pesan loading
-                showToast("Mencari lokasi perangkat...", false, 'bg-secondary');
-
-                // Dapatkan lokasi saat ini
-                navigator.geolocation.getCurrentPosition(
-                    function(position) {
-                        // Callback sukses
-                        const lat = position.coords.latitude;
-                        const lon = position.coords.longitude;
-
-                        latitudeInput.value = lat;
-                        longitudeInput.value = lon;
-                        
-                        showToast("Lokasi perangkat berhasil dideteksi dan diisi.", true);
-                    },
-                    function(error) {
-                        // Callback error
-                        let errorMessage = "Gagal mendeteksi lokasi perangkat: ";
-                        switch(error.code) {
-                            case error.PERMISSION_DENIED:
-                                errorMessage += "Pengguna menolak permintaan Geolocation.";
-                                break;
-                            case error.POSITION_UNAVAILABLE:
-                                errorMessage += "Informasi lokasi tidak tersedia.";
-                                break;
-                            case error.TIMEOUT:
-                                errorMessage += "Permintaan lokasi habis waktu.";
-                                break;
-                            case error.UNKNOWN_ERROR:
-                                errorMessage += "Terjadi kesalahan tidak dikenal.";
-                                break;
-                        }
-                        showToast(errorMessage, false);
-                    },
-                    {
-                        // Opsi konfigurasi Geolocation
-                        enableHighAccuracy: true, // Mencoba mendapatkan lokasi seakurat mungkin
-                        timeout: 10000,           // Waktu maksimum (ms) untuk menunggu hasil
-                        maximumAge: 0             // Jangan gunakan cache lokasi yang sudah tua
-                    }
-                );
-            } else {
-                showToast("Browser Anda tidak mendukung Geolocation API.", false);
-            }
-        });
-
-        // Fungsi bantu untuk menampilkan Toast
-        function showToast(message, isSuccess, customBgClass = null) {
-            const toast = document.createElement('div');
-            let bgClass = customBgClass ? customBgClass : (isSuccess ? 'bg-success' : 'bg-danger');
-
-            toast.className = `toast align-items-center text-white ${bgClass} border-0`;
-            toast.setAttribute('role', 'alert');
-            toast.setAttribute('aria-live', 'assertive');
-            toast.setAttribute('aria-atomic', 'true');
-            toast.innerHTML = `
-                <div class="d-flex">
-                    <div class="toast-body">${message}</div>
-                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-                </div>
-            `;
-            toastContainer.appendChild(toast);
-            const bootstrapToast = new bootstrap.Toast(toast, { delay: 5000 }); // Toast hilang setelah 5 detik
-            bootstrapToast.show();
-            // Hapus toast dari DOM setelah disembunyikan untuk menjaga kebersihan
-            toast.addEventListener('hidden.bs.toast', function () {
-                toast.remove();
-            });
-        }
     });
 </script>
 <script>
