@@ -1309,8 +1309,8 @@ if ($result_lokasi && $result_lokasi->num_rows > 0) {
                 <div class="table-responsive">
                     <table class="table table-hover table-striped d-none d-md-table">
                         <thead>
-                            <tr>
-                                <th scope="col">ID</th>
+                            <tr>  
+                            <!--<th scope="col">Id</th>  -->                         
                                 <th scope="col">Username</th>
                                 <th scope="col">Role</th>
                                 <th scope="col">Anggota Terkait</th>
@@ -1332,7 +1332,7 @@ if ($result_lokasi && $result_lokasi->num_rows > 0) {
                                     }
                                     ?>
                                     <tr>
-                                        <td><?= htmlspecialchars($row['id']) ?></td>
+                                        <!--<td><?= htmlspecialchars($row['id']) ?></td>-->
                                         <td><i class="fa-solid fa-user-circle me-2"></i><?= htmlspecialchars($row['username']) ?></td>
                                         <td><?= htmlspecialchars($row['role']) ?></td>
                                         <td><?= htmlspecialchars($anggotaName) ?></td>
@@ -1897,10 +1897,8 @@ if ($result_lokasi && $result_lokasi->num_rows > 0) {
         </div>
     </div>
 </div>
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="../assets/js/admin.js"></script>
-
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         // Ambil daftar anggota dari PHP dan konversi ke JavaScript
@@ -2007,62 +2005,7 @@ if ($result_lokasi && $result_lokasi->num_rows > 0) {
                 });
             }
         });
-    }
-
-    // --- Skrip BARU untuk Modal EDIT User ---
-    const searchInputEdit = document.getElementById('edit-search-anggota-user');
-    const searchResultsEdit = document.getElementById('edit-search-results-user');
-    const selectedAnggotaIdEdit = document.getElementById('edit-anggota-id-user');
-    const editModal = document.getElementById('editUsersModal');
-
-    if (searchInputEdit) {
-        searchInputEdit.addEventListener('input', function() {
-            const query = this.value.toLowerCase();
-            searchResultsEdit.innerHTML = '';
-            if (query.length > 0) {
-                const filteredAnggota = anggotaList.filter(anggota =>
-                    anggota.nama.toLowerCase().includes(query)
-                );
-                filteredAnggota.forEach(anggota => {
-                    const item = document.createElement('a');
-                    item.href = '#';
-                    item.className = 'list-group-item list-group-item-action';
-                    item.textContent = anggota.nama;
-                    item.setAttribute('data-id', anggota.id);
-                    item.setAttribute('data-nama', anggota.nama);
-                    item.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        searchInputEdit.value = this.getAttribute('data-nama');
-                        selectedAnggotaIdEdit.value = this.getAttribute('data-id');
-                        searchResultsEdit.innerHTML = '';
-                    });
-                    searchResultsEdit.appendChild(item);
-                });
-            }
-        });
-    }
-
-    // Fungsi untuk mengisi data saat tombol edit diklik
-    editModal.addEventListener('show.bs.modal', function (event) {
-        const button = event.relatedTarget;
-        const userData = JSON.parse(button.getAttribute('data-user'));
-        
-        // Mengisi data user yang sudah ada
-        document.getElementById('edit-users-id').value = userData.id;
-        document.getElementById('edit-username').value = userData.username;
-        document.getElementById('edit-role').value = userData.role;
-
-        // Mencari nama anggota berdasarkan ID untuk mengisi kolom pencarian
-        const relatedAnggota = anggotaList.find(a => a.id == userData.anggota_id);
-        if (relatedAnggota) {
-            searchInputEdit.value = relatedAnggota.nama;
-            selectedAnggotaIdEdit.value = relatedAnggota.id;
-        } else {
-            searchInputEdit.value = '';
-            selectedAnggotaIdEdit.value = '';
-        }
-        
-    });
+    }   
 });
 </script>    
 </body>

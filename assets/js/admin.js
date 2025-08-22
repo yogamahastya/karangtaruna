@@ -211,3 +211,58 @@
             });
         }
     });
+
+    // Fungsi untuk mengisi data saat tombol edit diklik
+    editModal.addEventListener('show.bs.modal', function (event) {
+        const button = event.relatedTarget;
+        const userData = JSON.parse(button.getAttribute('data-user'));
+        
+        // Mengisi data user yang sudah ada
+        document.getElementById('edit-users-id').value = userData.id;
+        document.getElementById('edit-username').value = userData.username;
+        document.getElementById('edit-role').value = userData.role;
+
+        // Mencari nama anggota berdasarkan ID untuk mengisi kolom pencarian
+        const relatedAnggota = anggotaList.find(a => a.id == userData.anggota_id);
+        if (relatedAnggota) {
+            searchInputEdit.value = relatedAnggota.nama;
+            selectedAnggotaIdEdit.value = relatedAnggota.id;
+        } else {
+            searchInputEdit.value = '';
+            selectedAnggotaIdEdit.value = '';
+        }
+        
+    });
+
+    // --- Skrip BARU untuk Modal EDIT User ---
+    const searchInputEdit = document.getElementById('edit-search-anggota-user');
+    const searchResultsEdit = document.getElementById('edit-search-results-user');
+    const selectedAnggotaIdEdit = document.getElementById('edit-anggota-id-user');
+    const editModal = document.getElementById('editUsersModal');
+
+    if (searchInputEdit) {
+        searchInputEdit.addEventListener('input', function() {
+            const query = this.value.toLowerCase();
+            searchResultsEdit.innerHTML = '';
+            if (query.length > 0) {
+                const filteredAnggota = anggotaList.filter(anggota =>
+                    anggota.nama.toLowerCase().includes(query)
+                );
+                filteredAnggota.forEach(anggota => {
+                    const item = document.createElement('a');
+                    item.href = '#';
+                    item.className = 'list-group-item list-group-item-action';
+                    item.textContent = anggota.nama;
+                    item.setAttribute('data-id', anggota.id);
+                    item.setAttribute('data-nama', anggota.nama);
+                    item.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        searchInputEdit.value = this.getAttribute('data-nama');
+                        selectedAnggotaIdEdit.value = this.getAttribute('data-id');
+                        searchResultsEdit.innerHTML = '';
+                    });
+                    searchResultsEdit.appendChild(item);
+                });
+            }
+        });
+    }
