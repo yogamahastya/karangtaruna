@@ -2,7 +2,7 @@
 // File: config.php
 // Konfigurasi Nama Organisasi
 define('ORGANIZATION_NAME', 'Karang Taruna Apa Aja Lah');
-// Ganti dengan jumlah iuran bulanan yang sebenarnya
+// Ganti dengan jumlah iuran
 define('DUES_MONTHLY_FEE', 10000); 
 // Konfigurasi Koneksi Database
 define('DB_SERVERNAME', 'localhost');
