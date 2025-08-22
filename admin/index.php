@@ -1822,8 +1822,7 @@ if ($result_lokasi && $result_lokasi->num_rows > 0) {
                     </div>
                     <div class="mb-3">
                         <label for="add-role" class="form-label">Role</label>
-                        <select class="form-select" id="add-role" name="data[role]" required>
-                           
+                        <select class="form-select" id="add-role" name="data[role]" required>                          
                             <option value="sekretaris">Sekretaris</option>
                             <option value="bendahara">Bendahara</option>
                             <option value="admin">Admin</option>
@@ -1831,9 +1830,9 @@ if ($result_lokasi && $result_lokasi->num_rows > 0) {
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label for="search-anggota-user" class="form-label">Anggota Terkait <span class="text-danger">*</span></label>
+                        <label for="search-anggota-user" class="form-label">Anggota Terkait<span class="text-danger">*</span></label>
                         <div class="input-group">
-                            <input type="text" class="form-control" id="search-anggota-user" placeholder="Cari anggota...">
+                            <input type="text" class="form-control" id="search-anggota-user" placeholder="Cari anggota sesuai dengan jabatan...">
                             <span class="input-group-text"><i class="fas fa-search"></i></span>
                         </div>
                         <div id="search-results-user" class="list-group mt-2" style="max-height: 200px; overflow-y: auto;">
