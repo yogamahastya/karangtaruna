@@ -754,7 +754,7 @@
                 </div>
             <?php else: ?>
                 <div class="alert alert-warning" role="alert">
-                    <i class="fa-solid fa-exclamation-triangle me-2"></i> **Peringatan:** Bagian ini kosong karena **tabel 'anggota' di database Anda tidak memiliki data**. Silakan tambahkan anggota terlebih dahulu.
+                    <i class="fa-solid fa-exclamation-triangle me-2"></i> **Peringatan:** Bagian ini kosong karena Anda tidak memiliki data**. Silakan tambahkan anggota terlebih dahulu.
                 </div>
             <?php endif; ?>
             <nav aria-label="Page navigation example">
