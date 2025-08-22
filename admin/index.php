@@ -1881,7 +1881,7 @@ if ($result_lokasi && $result_lokasi->num_rows > 0) {
                     <div class="mb-3">
                         <label for="edit-search-anggota-user" class="form-label">Anggota Terkait <span class="text-danger">*</span></label>
                         <div class="input-group">
-                            <input type="text" class="form-control" id="edit-search-anggota-user" placeholder="Cari anggota...">
+                            <input type="text" class="form-control" id="edit-search-anggota-user" placeholder="Cari anggota sesuai dengan jabatan...">
                             <span class="input-group-text"><i class="fas fa-search"></i></span>
                         </div>
                         <div id="edit-search-results-user" class="list-group mt-2" style="max-height: 200px; overflow-y: auto;">
