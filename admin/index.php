@@ -1371,10 +1371,11 @@ if ($result_lokasi && $result_lokasi->num_rows > 0) {
                                 }
                                 ?>
                                 <div class="card-item">
-                                    <div>
+                                <!--    <div>
                                         <span class="label">ID</span>
                                         <span class="value"><?= htmlspecialchars($row['id']) ?></span>
                                     </div>
+                                -->
                                     <div>
                                         <span class="label">Username</span>
                                         <span class="value"><?= htmlspecialchars($row['username']) ?></span>
