@@ -23,7 +23,6 @@ header('Content-Type: text/html; charset=UTF-8');
 // Konfigurasi dan Koneksi Database
 // =================================================================
 
-// Membuat koneksi ke database menggunakan konstanta dari config.php
 $conn = new mysqli(DB_SERVERNAME, DB_USERNAME, DB_PASSWORD, DB_NAME);
 if ($conn->connect_error) {
     die("Koneksi gagal: " . $conn->connect_error);
@@ -33,7 +32,6 @@ if ($conn->connect_error) {
 // Logika untuk Menangani Operasi CRUD
 // =================================================================
 
-// Fungsi baru untuk mendapatkan anggota_id dari user_id
 function getAnggotaIdFromUserId($conn, $userId) {
     $sql = "SELECT anggota_id FROM users WHERE id = ?";
     $stmt = $conn->prepare($sql);
@@ -46,14 +44,25 @@ function getAnggotaIdFromUserId($conn, $userId) {
     return null;
 }
 
+// Fungsi baru untuk mendapatkan nama lengkap anggota
+function getAnggotaNameById($conn, $anggotaId) {
+    $sql = "SELECT nama_lengkap FROM anggota WHERE id = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $anggotaId);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    if ($row = $result->fetch_assoc()) {
+        return $row['nama_lengkap'];
+    }
+    return 'Anggota tidak dikenal'; // Default jika ID tidak ditemukan
+}
+
 function getParamTypes($data) {
     $types = '';
-    foreach ($data as $key => $value) {
-        if ($value === '' || !is_numeric($value)) {
-            $types .= 's';
-        } elseif (filter_var($value, FILTER_VALIDATE_INT) !== false && strpos($value, '.') === false) {
+    foreach ($data as $value) {
+        if (is_int($value)) {
             $types .= 'i';
-        } elseif (filter_var($value, FILTER_VALIDATE_FLOAT) !== false) {
+        } elseif (is_float($value)) {
             $types .= 'd';
         } else {
             $types .= 's';
@@ -62,6 +71,9 @@ function getParamTypes($data) {
     return $types;
 }
 
+/**
+ * Menangani operasi tambah data dengan penanganan error duplikat.
+ */
 function handleAdd($conn, $tableName, $data) {
     if ($tableName === 'iuran') {
         $data['periode'] = $data['tanggal_bayar'];
@@ -73,7 +85,6 @@ function handleAdd($conn, $tableName, $data) {
         if ($anggotaId) {
             $data['dicatat_oleh_id'] = $anggotaId;
         } else {
-            // Fallback jika user_id tidak terkait dengan anggota_id, gunakan user_id dari sesi
             $data['dicatat_oleh_id'] = $_SESSION['user_id'];
         }
     } elseif ($tableName === 'users') {
@@ -86,12 +97,29 @@ function handleAdd($conn, $tableName, $data) {
     $placeholders = implode(", ", array_fill(0, count($data), "?"));
     $sql = "INSERT INTO `$tableName` ($columns) VALUES ($placeholders)";
     $stmt = $conn->prepare($sql);
+    
+    if (!$stmt) {
+        error_log("Prepare failed: (" . $conn->errno . ") " . $conn->error);
+        return false;
+    }
+    
     $types = getParamTypes($data);
     $params = array_values($data);
     
-    $stmt->bind_param($types, ...$params);
+    try {
+        $stmt->bind_param($types, ...$params);
+        $result = $stmt->execute();
+    } catch (mysqli_sql_exception $e) {
+        // Tangkap pengecualian duplikat
+        if ($e->getCode() === 1062) {
+            return 'duplicate_entry';
+        }
+        // Tangkap pengecualian lainnya
+        error_log("Execution failed: (" . $e->getCode() . ") " . $e->getMessage());
+        return false;
+    }
     
-    return $stmt->execute();
+    return $result;
 }
 
 function handleEdit($conn, $tableName, $id, $data) {
@@ -103,13 +131,18 @@ function handleEdit($conn, $tableName, $id, $data) {
         if (isset($data['password']) && !empty($data['password'])) {
             $data['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
         } else {
-            unset($data['password']); // Jangan update password jika kosong
+            unset($data['password']);
         }
     }
     
     $setClause = implode("=?, ", array_keys($data)) . "=?";
     $sql = "UPDATE `$tableName` SET $setClause WHERE id = ?";
     $stmt = $conn->prepare($sql);
+    
+    if (!$stmt) {
+        error_log("Prepare failed: (" . $conn->errno . ") " . $conn->error);
+        return false;
+    }
 
     $types = getParamTypes($data);
     $types .= "i";
@@ -128,12 +161,7 @@ function handleDelete($conn, $tableName, $id) {
     return $stmt->execute();
 }
 
-/**
- * Menangani pembaruan lokasi absensi di tabel lokasi_absensi.
- * Akan melakukan INSERT jika data belum ada (misal, untuk ID=1), atau UPDATE jika sudah ada.
- */
 function handleUpdateLocation($conn, $latitude, $longitude, $toleransi) {
-    // Diasumsikan hanya ada satu entri lokasi absensi utama dengan id = 1
     $sql = "INSERT INTO lokasi_absensi (id, latitude, longitude, toleransi_jarak)
             VALUES (1, ?, ?, ?)
             ON DUPLICATE KEY UPDATE
@@ -152,24 +180,47 @@ function handleUpdateLocation($conn, $latitude, $longitude, $toleransi) {
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $action = $_POST['action'];
-    $tab = $_POST['tab'] ?? ''; // Baris yang sudah diperbaiki dari diskusi sebelumnya
+    $tab = $_POST['tab'] ?? '';
     $success = false;
     $message = "";
 
-    // Perbaikan: Tambahkan pengecekan sebelum menggunakan $_POST['data']
     $data = [];
     if (isset($_POST['data']) && is_array($_POST['data'])) {
         $data = array_map('trim', $_POST['data']);
     }
 
     if ($action == 'add') {
-        $success = handleAdd($conn, $tab, $data);
+        $result = handleAdd($conn, $tab, $data);
+        
+        if ($result === true) {
+            $success = true;
+            $message = "Operasi tambah data berhasil! 🎉";
+        } elseif ($result === 'duplicate_entry') {
+            $success = false;
+            // Notifikasi spesifik untuk anggota, notifikasi umum untuk yang lain
+            if ($tab === 'anggota' && isset($data['nama_lengkap'])) {
+                $message = "Operasi gagal: Nama anggota '{$data['nama_lengkap']}' sudah ada. Silakan gunakan nama lain. ❌";
+            } elseif ($tab === 'iuran') {
+                $anggota_id = $data['anggota_id'] ?? 'N/A';
+                $tanggal = $data['tanggal_bayar'] ?? 'N/A';
+                // Panggil fungsi baru untuk mendapatkan nama
+                $anggota_nama = getAnggotaNameById($conn, $anggota_id);
+                $message = "Operasi gagal: Data iuran untuk anggota bernama {$anggota_nama} pada tanggal {$tanggal} sudah ada. ❗";
+            } else {
+                $message = "Operasi gagal: Data duplikat terdeteksi. Silakan periksa kembali entri Anda. ❗";
+            }
+        } else {
+            $success = false;
+            $message = "Operasi tambah data gagal: " . $conn->error;
+        }
     } elseif ($action == 'edit') {
         $id = $_POST['id'];
         $success = handleEdit($conn, $tab, $id, $data);
+        $message = $success ? "Operasi edit berhasil! ✅" : "Operasi edit gagal: " . $conn->error;
     } elseif ($action == 'delete') {
         $id = $_POST['id'];
         $success = handleDelete($conn, $tab, $id);
+        $message = $success ? "Operasi hapus berhasil! 🗑️" : "Operasi hapus gagal: " . $conn->error;
     } elseif ($action == 'update_location') {
         $latitude = filter_var($_POST['lokasi_latitude'], FILTER_VALIDATE_FLOAT);
         $longitude = filter_var($_POST['lokasi_longitude'], FILTER_VALIDATE_FLOAT);
@@ -181,16 +232,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         } else {
             $success = handleUpdateLocation($conn, $latitude, $longitude, $toleransi);
         }
-        $tab = 'users'; // Kembali ke tab users setelah update lokasi
-    }
-
-    if ($success) {
-        $message = "Operasi $action berhasil!";
-    } else {
-        $message = "Operasi $action gagal: " . $conn->error;
-        if (isset($stmt) && $stmt->error) {
-            $message .= " (" . $stmt->error . ")";
-        }
+        $message = $success ? "Operasi update lokasi berhasil! 📍" : "Operasi update lokasi gagal: " . $conn->error;
+        $tab = 'users';
     }
 }
 
@@ -303,7 +346,6 @@ function fetchDataWithPagination($conn, $tableName, $start, $limit, $searchTerm 
             }
         }
     }
-    // Perbaikan: Pastikan $stmt ditutup di sini setelah semua data diambil atau kesalahan terjadi
     if ($stmt) {
         $stmt->close();
     }
@@ -390,7 +432,6 @@ function countRowsWithFilter($conn, $tableName, $searchTerm = null, $filterYear 
         $stmt->execute();
         $result = $stmt->get_result();
         $row = $result->fetch_assoc();
-        // Perbaikan: Pastikan $stmt ditutup di sini
         $stmt->close();
         return $row['total'];
     }
@@ -407,16 +448,13 @@ $selectedYear = isset($_GET['year']) ? (int)$_GET['year'] : $currentYear;
 $searchTerm = isset($_GET['search']) ? trim($_GET['search']) : '';
 
 // Pengaturan Paginasi
-$limit = 10; // Jumlah data per halaman
-// PERBAIKAN: Pastikan $_GET['page'] yang digunakan di intval()
-// Dan pastikan $page minimal 1
-$page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1; 
-$start = ($page - 1) * $limit; // Ini akan selalu >= 0
+$limit = 10;
+$page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
+$start = ($page - 1) * $limit;
 
 $total_rows = countRowsWithFilter($conn, $active_tab, $searchTerm, $selectedYear);
 $total_pages = ceil($total_rows / $limit);
 
-// Ambil data yang sudah dipaginasi
 $anggota = [];
 $kegiatan = [];
 $keuangan = [];
@@ -435,12 +473,10 @@ if ($active_tab === 'anggota') {
     $users = fetchDataWithPagination($conn, 'users', $start, $limit, $searchTerm, $selectedYear);
 }
 
-// Data total untuk dashboard (tidak dipaginasi)
 $totalAnggota = countRowsWithFilter($conn, 'anggota');
 $totalPemasukan = 0;
 $totalPengeluaran = 0;
-// Perbaikan: Pastikan fetchDataWithPagination di sini juga menggunakan parameter yang benar
-$allKeuangan = fetchDataWithPagination($conn, 'keuangan', 0, 10, null, $selectedYear);
+$allKeuangan = fetchDataWithPagination($conn, 'keuangan', 0, 10000, null, $selectedYear);
 foreach ($allKeuangan as $transaksi) {
     if ($transaksi['jenis_transaksi'] == 'pemasukan') {
         $totalPemasukan += $transaksi['jumlah'];
@@ -450,19 +486,16 @@ foreach ($allKeuangan as $transaksi) {
 }
 $saldo = $totalPemasukan - $totalPengeluaran;
 $totalIuran = 0;
-// Perbaikan: Pastikan fetchDataWithPagination di sini juga menggunakan parameter yang benar
-$allIuran = fetchDataWithPagination($conn, 'iuran', 0, 10, null, $selectedYear);
+$allIuran = fetchDataWithPagination($conn, 'iuran', 0, 10000, null, $selectedYear);
 foreach ($allIuran as $transaksi) {
     $totalIuran += $transaksi['jumlah_bayar'];
 }
 
-// Perbaikan: Pastikan fetchDataWithPagination di sini juga menggunakan parameter yang benar
-$anggotaList = fetchDataWithPagination($conn, 'anggota', 0, 10, null, null); // Untuk dropdown di modal
+$anggotaList = fetchDataWithPagination($conn, 'anggota', 0, 10000, null, null);
 
-// Ambil data lokasi absensi saat ini dari database untuk pre-fill modal
-$current_latitude = -7.527444; // Default jika belum ada di DB
-$current_longitude = 110.628819; // Default jika belum ada di DB
-$current_tolerance = 50; // Default jika belum ada di DB
+$current_latitude = -7.527444;
+$current_longitude = 110.628819;
+$current_tolerance = 50;
 
 $sql_lokasi = "SELECT latitude, longitude, toleransi_jarak FROM lokasi_absensi WHERE id = 1 LIMIT 1";
 $result_lokasi = $conn->query($sql_lokasi);
@@ -499,10 +532,10 @@ if ($result_lokasi && $result_lokasi->num_rows > 0) {
     </header>
 
     <?php if (isset($message)): ?>
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <?= htmlspecialchars($message) ?>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
+    <div class="alert alert-<?= $success ? 'success' : 'danger' ?> alert-dismissible fade show" role="alert">
+        <?= htmlspecialchars($message) ?>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
     <?php endif; ?>
 
     <div class="mb-5">
@@ -581,7 +614,6 @@ if ($result_lokasi && $result_lokasi->num_rows > 0) {
                                         <?php
                                             $jabatan = htmlspecialchars($row['jabatan']);
                                             $badge_class = '';
-
                                             // Tentukan kelas CSS berdasarkan nilai jabatan
                                             switch (strtolower($jabatan)) {
                                                 case 'ketua':
