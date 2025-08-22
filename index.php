@@ -1,460 +1,460 @@
 <?php
-// Memuat file konfigurasi yang berisi detail database dan nama organisasi
-require_once 'config.php';
+        // Memuat file konfigurasi yang berisi detail database dan nama organisasi
+        require_once 'config.php';
 
-// Penting: Baris ini memberitahu browser untuk menggunakan UTF-8
-header('Content-Type: text/html; charset=UTF-8');
+        // Penting: Baris ini memberitahu browser untuk menggunakan UTF-8
+        header('Content-Type: text/html; charset=UTF-8');
 
-// Memulai sesi (tetap diperlukan untuk pesan notifikasi, meskipun user_id tidak digunakan untuk absen)
-session_start();
+        // Memulai sesi (tetap diperlukan untuk pesan notifikasi, meskipun user_id tidak digunakan untuk absen)
+        session_start();
 
-// =================================================================
-// Konfigurasi dan Koneksi Database
-// =================================================================
-$servername = DB_SERVERNAME;
-$username = DB_USERNAME;
-$password = DB_PASSWORD;
-$dbname = DB_NAME;
+        // =================================================================
+        // Konfigurasi dan Koneksi Database
+        // =================================================================
+        $servername = DB_SERVERNAME;
+        $username = DB_USERNAME;
+        $password = DB_PASSWORD;
+        $dbname = DB_NAME;
 
-// Membuat koneksi
-$conn = new mysqli($servername, $username, $password, $dbname);
-// Memeriksa koneksi
-if ($conn->connect_error) {
-    die("Koneksi gagal: " . $conn->connect_error);
-}
+        // Membuat koneksi
+        $conn = new mysqli($servername, $username, $password, $dbname);
+        // Memeriksa koneksi
+        if ($conn->connect_error) {
+            die("Koneksi gagal: " . $conn->connect_error);
+        }       
 
-// =================================================================
-// Fungsi-Fungsi Pembantu
-// =================================================================
-/**
- * Mengubah angka menjadi format Rupiah.
- * @param int|float $amount Jumlah uang.
- * @return string Mengembalikan string format Rupiah.
- */
-function formatRupiah($amount) {
-    return 'Rp' . number_format($amount, 0, ',', '.');
-}
-
-/**
- * Menghitung jarak antara dua titik GPS menggunakan Rumus Haversine.
- * @param float $lat1 Latitude titik 1.
- * @param float $lon1 Longitude titik 1.
- * @param float $lat2 Latitude titik 2.
- * @param float $lon2 Longitude titik 2.
- * @return float Jarak dalam meter.
- */
-function haversineGreatCircleDistance($lat1, $lon1, $lat2, $lon2) {
-    $earthRadius = 6371000; // Jari-jari Bumi dalam meter
-    
-    // Mengubah koordinat dari derajat ke radian
-    $latFrom = deg2rad($lat1);
-    $lonFrom = deg2rad($lon1);
-    $latTo = deg2rad($lat2);
-    $lonTo = deg2rad($lon2);
-
-    $latDelta = $latTo - $latFrom;
-    $lonDelta = $lonTo - $lonFrom;
-    $angle = 2 * asin(sqrt(pow(sin($latDelta / 2), 2) +
-        cos($latFrom) * cos($latTo) * pow(sin(abs($lonDelta) / 2), 2)));
-    return $angle * $earthRadius;
-}
-
-/**
- * Mengambil data dengan paginasi dan pencarian.
- *
- * @param mysqli $conn Koneksi database.
- * @param string $tableName Nama tabel.
- * @param int $start Index awal data.
- * @param int $limit Jumlah data per halaman.
- * @param string|null $searchTerm Kata kunci pencarian.
- * @param int|null $filterYear Tahun filter (untuk keuangan/iuran).
- * @return array Data yang sudah difilter dan dipaginasi.
- */
-function fetchDataWithPagination($conn, $tableName, $start, $limit, $searchTerm = null, $filterYear = null) {
-    $data = [];
-    $sql = "";
-    $conditions = [];
-    $params = [];
-    $types = '';
-    $orderBy = '';
-
-    // Logika JOIN dan ORDER BY khusus untuk tabel tertentu
-    if ($tableName === 'keuangan') {
-        $sql = "SELECT k.*, a.nama_lengkap AS dicatat_oleh_nama FROM keuangan k LEFT JOIN anggota a ON k.dicatat_oleh_id = a.id";
-        $orderBy = 'k.tanggal_transaksi DESC';
-    } elseif ($tableName === 'iuran') {
-        $sql = "SELECT a.id AS anggota_id, a.nama_lengkap, a.bergabung_sejak, COALESCE(SUM(i.jumlah_bayar), 0) AS total_bayar FROM anggota AS a LEFT JOIN iuran AS i ON a.id = i.anggota_id";
-        $orderBy = "FIELD(a.jabatan, 'Ketua', 'Wakil Ketua', 'Sekretaris', 'Bendahara', 'Humas', 'Anggota'), a.nama_lengkap ASC";
-    } elseif ($tableName === 'anggota') {
-        $sql = "SELECT * FROM `anggota`";
-        $orderBy = "FIELD(jabatan, 'Ketua', 'Wakil Ketua', 'Sekretaris', 'Bendahara', 'Humas', 'Anggota'), nama_lengkap ASC";
-    } elseif ($tableName === 'absensi') {
-        // PERBAIKAN: Gunakan JOIN untuk absensi agar dapat mencari berdasarkan nama anggota
-        $sql = "SELECT a.*, ab.tanggal_absen, ab.id as absensi_id FROM anggota a LEFT JOIN absensi ab ON a.id = ab.anggota_id AND DATE(ab.tanggal_absen) = CURDATE()";
-        $orderBy = "FIELD(a.jabatan, 'Ketua', 'Wakil Ketua', 'Sekretaris', 'Bendahara', 'Humas', 'Anggota'), a.nama_lengkap ASC";
-    } elseif ($tableName === 'kegiatan') {
-        $sql = "SELECT * FROM `kegiatan`";
-        $orderBy = 'tanggal_mulai DESC';
-    }
-
-    // Kondisi filter tahun
-    if ($filterYear) {
-        if ($tableName === 'keuangan') {
-            $conditions[] = "YEAR(k.tanggal_transaksi) = ?";
-            $params[] = $filterYear;
-            $types .= 'i';
-        } elseif ($tableName === 'iuran') {
-            $sql = "SELECT a.id AS anggota_id, a.nama_lengkap, a.bergabung_sejak, COALESCE(SUM(i.jumlah_bayar), 0) AS total_bayar FROM anggota AS a LEFT JOIN iuran AS i ON a.id = i.anggota_id AND YEAR(i.tanggal_bayar) = ?";
-            $params[] = $filterYear;
-            $types .= 'i';
+        // =================================================================
+        // Fungsi-Fungsi Pembantu
+        // =================================================================
+        /**
+        * Mengubah angka menjadi format Rupiah.
+        * @param int|float $amount Jumlah uang.
+        * @return string Mengembalikan string format Rupiah.
+        */
+        function formatRupiah($amount) {
+            return 'Rp' . number_format($amount, 0, ',', '.');
         }
-    }
 
-    // Kondisi pencarian
-    if ($searchTerm) {
-        $searchTermLike = '%' . $searchTerm . '%';
-        if ($tableName === 'anggota') {
-             // PERBAIKAN: Hapus alias 'a' karena query utama tidak menggunakannya
-            $conditions[] = "(nama_lengkap LIKE ? OR jabatan LIKE ?)";
-            $params[] = $searchTermLike;
-            $params[] = $searchTermLike;
-            $types .= 'ss';
-        } elseif ($tableName === 'absensi') {
-             // PERBAIKAN: Pertahankan alias 'a' karena query utama menggunakannya (JOIN)
-            $conditions[] = "(a.nama_lengkap LIKE ? OR a.jabatan LIKE ?)";
-            $params[] = $searchTermLike;
-            $params[] = $searchTermLike;
-            $types .= 'ss';
-        } elseif ($tableName === 'kegiatan') {
-            $conditions[] = "(nama_kegiatan LIKE ? OR deskripsi LIKE ? OR lokasi LIKE ?)";
-            $params[] = $searchTermLike;
-            $params[] = $searchTermLike;
-            $params[] = $searchTermLike;
-            $types .= 'sss';
-        } elseif ($tableName === 'keuangan') {
-            $conditions[] = "(k.jenis_transaksi LIKE ? OR k.deskripsi LIKE ? OR a.nama_lengkap LIKE ?)";
-            $params[] = $searchTermLike;
-            $params[] = $searchTermLike;
-            $params[] = $searchTermLike;
-            $types .= 'sss';
-        } elseif ($tableName === 'iuran') {
-            $conditions[] = "(a.nama_lengkap LIKE ?)";
-            $params[] = $searchTermLike;
-            $types .= 's';
+        /**
+        * Menghitung jarak antara dua titik GPS menggunakan Rumus Haversine.
+        * @param float $lat1 Latitude titik 1.
+        * @param float $lon1 Longitude titik 1.
+        * @param float $lat2 Latitude titik 2.
+        * @param float $lon2 Longitude titik 2.
+        * @return float Jarak dalam meter.
+        */
+        function haversineGreatCircleDistance($lat1, $lon1, $lat2, $lon2) {
+            $earthRadius = 6371000; // Jari-jari Bumi dalam meter
+            
+            // Mengubah koordinat dari derajat ke radian
+            $latFrom = deg2rad($lat1);
+            $lonFrom = deg2rad($lon1);
+            $latTo = deg2rad($lat2);
+            $lonTo = deg2rad($lon2);
+
+            $latDelta = $latTo - $latFrom;
+            $lonDelta = $lonTo - $lonFrom;
+            $angle = 2 * asin(sqrt(pow(sin($latDelta / 2), 2) +
+                cos($latFrom) * cos($latTo) * pow(sin(abs($lonDelta) / 2), 2)));
+            return $angle * $earthRadius;
         }
-    }
 
-    if (!empty($conditions)) {
-        if ($tableName === 'iuran' && strpos($sql, 'WHERE') === false && strpos($sql, 'AND YEAR(i.tanggal_bayar)') !== false) {
-            $sql .= " AND " . implode(" AND ", $conditions);
-        } elseif (strpos($sql, 'WHERE') === false) {
-            $sql .= " WHERE " . implode(" AND ", $conditions);
-        } else {
-            $sql .= " AND " . implode(" AND ", $conditions);
+        /**
+         * Mengambil data dengan paginasi dan pencarian.
+         *
+         * @param mysqli $conn Koneksi database.
+         * @param string $tableName Nama tabel.
+         * @param int $start Index awal data.
+         * @param int $limit Jumlah data per halaman.
+         * @param string|null $searchTerm Kata kunci pencarian.
+         * @param int|null $filterYear Tahun filter (untuk keuangan/iuran).
+         * @return array Data yang sudah difilter dan dipaginasi.
+         */
+        function fetchDataWithPagination($conn, $tableName, $start, $limit, $searchTerm = null, $filterYear = null) {
+            $data = [];
+            $sql = "";
+            $conditions = [];
+            $params = [];
+            $types = '';
+            $orderBy = '';
+
+            // Logika JOIN dan ORDER BY khusus untuk tabel tertentu
+            if ($tableName === 'keuangan') {
+                $sql = "SELECT k.*, a.nama_lengkap AS dicatat_oleh_nama FROM keuangan k LEFT JOIN anggota a ON k.dicatat_oleh_id = a.id";
+                $orderBy = 'k.tanggal_transaksi DESC';
+            } elseif ($tableName === 'iuran') {
+                $sql = "SELECT a.id AS anggota_id, a.nama_lengkap, a.bergabung_sejak, COALESCE(SUM(i.jumlah_bayar), 0) AS total_bayar FROM anggota AS a LEFT JOIN iuran AS i ON a.id = i.anggota_id";
+                $orderBy = "FIELD(a.jabatan, 'Ketua', 'Wakil Ketua', 'Sekretaris', 'Bendahara', 'Humas', 'Anggota'), a.nama_lengkap ASC";
+            } elseif ($tableName === 'anggota') {
+                $sql = "SELECT * FROM `anggota`";
+                $orderBy = "FIELD(jabatan, 'Ketua', 'Wakil Ketua', 'Sekretaris', 'Bendahara', 'Humas', 'Anggota'), nama_lengkap ASC";
+            } elseif ($tableName === 'absensi') {
+                // PERBAIKAN: Gunakan JOIN untuk absensi agar dapat mencari berdasarkan nama anggota
+                $sql = "SELECT a.*, ab.tanggal_absen, ab.id as absensi_id FROM anggota a LEFT JOIN absensi ab ON a.id = ab.anggota_id AND DATE(ab.tanggal_absen) = CURDATE()";
+                $orderBy = "FIELD(a.jabatan, 'Ketua', 'Wakil Ketua', 'Sekretaris', 'Bendahara', 'Humas', 'Anggota'), a.nama_lengkap ASC";
+            } elseif ($tableName === 'kegiatan') {
+                $sql = "SELECT * FROM `kegiatan`";
+                $orderBy = 'tanggal_mulai DESC';
+            }
+
+            // Kondisi filter tahun
+            if ($filterYear) {
+                if ($tableName === 'keuangan') {
+                    $conditions[] = "YEAR(k.tanggal_transaksi) = ?";
+                    $params[] = $filterYear;
+                    $types .= 'i';
+                } elseif ($tableName === 'iuran') {
+                    $sql = "SELECT a.id AS anggota_id, a.nama_lengkap, a.bergabung_sejak, COALESCE(SUM(i.jumlah_bayar), 0) AS total_bayar FROM anggota AS a LEFT JOIN iuran AS i ON a.id = i.anggota_id AND YEAR(i.tanggal_bayar) = ?";
+                    $params[] = $filterYear;
+                    $types .= 'i';
+                }
+            }
+
+            // Kondisi pencarian
+            if ($searchTerm) {
+                $searchTermLike = '%' . $searchTerm . '%';
+                if ($tableName === 'anggota') {
+                    // PERBAIKAN: Hapus alias 'a' karena query utama tidak menggunakannya
+                    $conditions[] = "(nama_lengkap LIKE ? OR jabatan LIKE ?)";
+                    $params[] = $searchTermLike;
+                    $params[] = $searchTermLike;
+                    $types .= 'ss';
+                } elseif ($tableName === 'absensi') {
+                    // PERBAIKAN: Pertahankan alias 'a' karena query utama menggunakannya (JOIN)
+                    $conditions[] = "(a.nama_lengkap LIKE ? OR a.jabatan LIKE ?)";
+                    $params[] = $searchTermLike;
+                    $params[] = $searchTermLike;
+                    $types .= 'ss';
+                } elseif ($tableName === 'kegiatan') {
+                    $conditions[] = "(nama_kegiatan LIKE ? OR deskripsi LIKE ? OR lokasi LIKE ?)";
+                    $params[] = $searchTermLike;
+                    $params[] = $searchTermLike;
+                    $params[] = $searchTermLike;
+                    $types .= 'sss';
+                } elseif ($tableName === 'keuangan') {
+                    $conditions[] = "(k.jenis_transaksi LIKE ? OR k.deskripsi LIKE ? OR a.nama_lengkap LIKE ?)";
+                    $params[] = $searchTermLike;
+                    $params[] = $searchTermLike;
+                    $params[] = $searchTermLike;
+                    $types .= 'sss';
+                } elseif ($tableName === 'iuran') {
+                    $conditions[] = "(a.nama_lengkap LIKE ?)";
+                    $params[] = $searchTermLike;
+                    $types .= 's';
+                }
+            }
+
+            if (!empty($conditions)) {
+                if ($tableName === 'iuran' && strpos($sql, 'WHERE') === false && strpos($sql, 'AND YEAR(i.tanggal_bayar)') !== false) {
+                    $sql .= " AND " . implode(" AND ", $conditions);
+                } elseif (strpos($sql, 'WHERE') === false) {
+                    $sql .= " WHERE " . implode(" AND ", $conditions);
+                } else {
+                    $sql .= " AND " . implode(" AND ", $conditions);
+                }
+            }
+            
+            if ($tableName === 'iuran') {
+                $sql .= " GROUP BY a.id, a.nama_lengkap, a.bergabung_sejak";
+            }
+
+            $sql .= " ORDER BY $orderBy LIMIT ? OFFSET ?";
+            
+            $params[] = $limit;
+            $params[] = $start;
+            $types .= 'ii';
+
+            $stmt = $conn->prepare($sql);
+            if ($stmt) {
+                if (!empty($params)) {
+                    $stmt->bind_param($types, ...$params);
+                }
+                $stmt->execute();
+                $result = $stmt->get_result();
+
+                if ($result && $result->num_rows > 0) {
+                    while ($row = $result->fetch_assoc()) {
+                        $data[] = $row;
+                    }
+                }
+                $stmt->close();
+            }
+            return $data;
         }
-    }
-    
-    if ($tableName === 'iuran') {
-        $sql .= " GROUP BY a.id, a.nama_lengkap, a.bergabung_sejak";
-    }
 
-    $sql .= " ORDER BY $orderBy LIMIT ? OFFSET ?";
-    
-    $params[] = $limit;
-    $params[] = $start;
-    $types .= 'ii';
+        /**
+         * Mengambil rekapitulasi iuran per anggota secara rinci, dengan filter tahun.
+         * @param mysqli $conn Objek koneksi database.
+         * @param int $anggotaId ID anggota.
+         * @param int|null $year Tahun yang akan difilter. Jika null, ambil semua data.
+         * @param int $monthlyFee Iuran bulanan yang diharapkan.
+         * @return array|null Mengembalikan array data rekapitulasi atau null jika tidak ditemukan.
+         */
+        function fetchMemberDuesBreakdownWithYear($conn, $anggotaId, $year = null, $monthlyFee = 10000) {
+            $memberData = null;
+            $duesData = [];
+            $sqlMember = "SELECT nama_lengkap, bergabung_sejak FROM anggota WHERE id = ?";
+            $stmt = $conn->prepare($sqlMember);
+            $stmt->bind_param("i", $anggotaId);
+            $stmt->execute();
+            $resultMember = $stmt->get_result();
+            if ($resultMember->num_rows > 0) {
+                $memberData = $resultMember->fetch_assoc();
+            } else {
+                return null;
+            }
+            $stmt->close();
+            
+            $sqlDues = "SELECT jumlah_bayar, tanggal_bayar FROM iuran WHERE anggota_id = ?";
+            $params = [$anggotaId];
+            $types = "i";
+            
+            if ($year !== null && is_numeric($year)) {
+                $sqlDues .= " AND YEAR(tanggal_bayar) = ?";
+                $params[] = $year;
+                $types .= "i";
+            }
+            $sqlDues .= " ORDER BY tanggal_bayar ASC";
 
-    $stmt = $conn->prepare($sql);
-    if ($stmt) {
-        if (!empty($params)) {
+            $stmt = $conn->prepare($sqlDues);
             $stmt->bind_param($types, ...$params);
-        }
-        $stmt->execute();
-        $result = $stmt->get_result();
+            $stmt->execute();
+            $resultDues = $stmt->get_result();
+            $payments = [];
+            while ($row = $resultDues->fetch_assoc()) {
+                $payments[] = $row;
+            }
+            $stmt->close();
 
-        if ($result && $result->num_rows > 0) {
-            while ($row = $result->fetch_assoc()) {
-                $data[] = $row;
+            $joinDate = new DateTime($memberData['bergabung_sejak']);
+            $today = new DateTime();
+            $startYear = ($year !== null) ? $year : intval($joinDate->format('Y'));
+            $endYear = ($year !== null) ? $year : intval($today->format('Y'));
+            $currentMonth = new DateTime("{$startYear}-01-01");
+            if ($currentMonth < $joinDate) {
+                $currentMonth = $joinDate;
+            }
+
+            $endOfMonthLoop = ($year !== null) ? new DateTime("{$year}-12-31") : $today;
+            
+            $totalPaid = 0;
+            $totalExpected = 0;
+            while ($currentMonth <= $endOfMonthLoop) {
+                $month = $currentMonth->format('F Y');
+                $monthKey = $currentMonth->format('Y-m');
+                $paymentForThisMonth = 0;
+                $notes = '';
+
+                foreach ($payments as $payment) {
+                    $paymentDate = new DateTime($payment['tanggal_bayar']);
+                    if ($paymentDate->format('Y-m') === $monthKey) {
+                        $paymentForThisMonth += $payment['jumlah_bayar'];
+                    }
+                }
+
+                $status = 'Belum Bayar';
+                if ($paymentForThisMonth >= $monthlyFee) {
+                    $status = 'Lunas';
+                } elseif ($paymentForThisMonth > 0) {
+                    $status = 'Kurang';
+                    $kekurangan = $monthlyFee - $paymentForThisMonth;
+                    $notes = 'Kurang ' . formatRupiah($kekurangan);
+                }
+
+                $totalPaid += $paymentForThisMonth;
+                $totalExpected += $monthlyFee;
+                $duesData[] = [
+                    'month' => $month,
+                    'paid' => $paymentForThisMonth,
+                    'status' => $status,
+                    'notes' => $notes
+                ];
+                $currentMonth->modify('+1 month');
+            }
+
+            $kekurangan = $totalExpected - $totalPaid;
+            return [
+                'member' => $memberData,
+                'breakdown' => $duesData,
+                'summary' => [
+                    'total_paid' => $totalPaid,
+                    'total_expected' => $totalExpected,
+                    'shortfall' => $kekurangan
+                ]
+            ];
+        }
+
+        /**
+         * Fungsi untuk menentukan status pembayaran dan kelas badge.
+         * @param int $totalPaid Jumlah yang telah dibayar.
+         * @param int $totalExpected Jumlah yang seharusnya dibayar.
+         * @return array Mengembalikan array berisi string status dan kelas CSS.
+         */
+        function getPaymentStatus($totalPaid, $totalExpected) {
+            if ($totalPaid >= $totalExpected) {
+                return ['status' => 'Lunas', 'class' => 'bg-success'];
+            } else {
+                return ['status' => 'Kurang', 'class' => 'bg-danger'];
             }
         }
-        $stmt->close();
-    }
-    return $data;
-}
 
-/**
- * Mengambil rekapitulasi iuran per anggota secara rinci, dengan filter tahun.
- * @param mysqli $conn Objek koneksi database.
- * @param int $anggotaId ID anggota.
- * @param int|null $year Tahun yang akan difilter. Jika null, ambil semua data.
- * @param int $monthlyFee Iuran bulanan yang diharapkan.
- * @return array|null Mengembalikan array data rekapitulasi atau null jika tidak ditemukan.
- */
-function fetchMemberDuesBreakdownWithYear($conn, $anggotaId, $year = null, $monthlyFee = 10000) {
-    $memberData = null;
-    $duesData = [];
-    $sqlMember = "SELECT nama_lengkap, bergabung_sejak FROM anggota WHERE id = ?";
-    $stmt = $conn->prepare($sqlMember);
-    $stmt->bind_param("i", $anggotaId);
-    $stmt->execute();
-    $resultMember = $stmt->get_result();
-    if ($resultMember->num_rows > 0) {
-        $memberData = $resultMember->fetch_assoc();
-    } else {
-        return null;
-    }
-    $stmt->close();
-    
-    $sqlDues = "SELECT jumlah_bayar, tanggal_bayar FROM iuran WHERE anggota_id = ?";
-    $params = [$anggotaId];
-    $types = "i";
-    
-    if ($year !== null && is_numeric($year)) {
-        $sqlDues .= " AND YEAR(tanggal_bayar) = ?";
-        $params[] = $year;
-        $types .= "i";
-    }
-    $sqlDues .= " ORDER BY tanggal_bayar ASC";
+        /**
+         * Menghitung total baris untuk paginasi.
+         * @param mysqli $conn Koneksi database.
+         * @param string $tableName Nama tabel.
+         * @param string|null $searchTerm Kata kunci pencarian.
+         * @param int|null $filterYear Tahun filter.
+         * @return int Total baris.
+         */
+        function countRowsWithFilter($conn, $tableName, $searchTerm = null, $filterYear = null) {
+            $sql = "";
+            $conditions = [];
+            $params = [];
+            $types = '';
 
-    $stmt = $conn->prepare($sqlDues);
-    $stmt->bind_param($types, ...$params);
-    $stmt->execute();
-    $resultDues = $stmt->get_result();
-    $payments = [];
-    while ($row = $resultDues->fetch_assoc()) {
-        $payments[] = $row;
-    }
-    $stmt->close();
-
-    $joinDate = new DateTime($memberData['bergabung_sejak']);
-    $today = new DateTime();
-    $startYear = ($year !== null) ? $year : intval($joinDate->format('Y'));
-    $endYear = ($year !== null) ? $year : intval($today->format('Y'));
-    $currentMonth = new DateTime("{$startYear}-01-01");
-    if ($currentMonth < $joinDate) {
-        $currentMonth = $joinDate;
-    }
-
-    $endOfMonthLoop = ($year !== null) ? new DateTime("{$year}-12-31") : $today;
-    
-    $totalPaid = 0;
-    $totalExpected = 0;
-    while ($currentMonth <= $endOfMonthLoop) {
-        $month = $currentMonth->format('F Y');
-        $monthKey = $currentMonth->format('Y-m');
-        $paymentForThisMonth = 0;
-        $notes = '';
-
-        foreach ($payments as $payment) {
-            $paymentDate = new DateTime($payment['tanggal_bayar']);
-            if ($paymentDate->format('Y-m') === $monthKey) {
-                $paymentForThisMonth += $payment['jumlah_bayar'];
+            if ($tableName === 'keuangan') {
+                $sql = "SELECT COUNT(*) AS total FROM keuangan k LEFT JOIN anggota a ON k.dicatat_oleh_id = a.id";
+            } elseif ($tableName === 'iuran' || $tableName === 'absensi') {
+                $sql = "SELECT COUNT(*) AS total FROM anggota";
+            } else {
+                $sql = "SELECT COUNT(*) AS total FROM `$tableName`";
             }
+
+            if ($filterYear) {
+                if ($tableName === 'keuangan') {
+                    $conditions[] = "YEAR(k.tanggal_transaksi) = ?";
+                    $params[] = $filterYear;
+                    $types .= 'i';
+                }
+            }
+            if ($searchTerm) {
+                $searchTermLike = '%' . $searchTerm . '%';
+                if ($tableName === 'anggota' || $tableName === 'absensi') {
+                    // PERBAIKAN: Hapus alias 'a' karena query utama tidak menggunakannya
+                    $conditions[] = "(nama_lengkap LIKE ? OR jabatan LIKE ?)";
+                    $params[] = $searchTermLike;
+                    $params[] = $searchTermLike;
+                    $types .= 'ss';
+                } elseif ($tableName === 'kegiatan') {
+                    $conditions[] = "(nama_kegiatan LIKE ? OR deskripsi LIKE ? OR lokasi LIKE ?)";
+                    $params[] = $searchTermLike;
+                    $params[] = $searchTermLike;
+                    $params[] = $searchTermLike;
+                    $types .= 'sss';
+                } elseif ($tableName === 'keuangan') {
+                    $conditions[] = "(k.jenis_transaksi LIKE ? OR k.deskripsi LIKE ? OR a.nama_lengkap LIKE ?)";
+                    $params[] = $searchTermLike;
+                    $params[] = $searchTermLike;
+                    $params[] = $searchTermLike;
+                    $types .= 'sss';
+                } elseif ($tableName === 'iuran') {
+                    $sql = "SELECT COUNT(*) AS total FROM anggota a WHERE nama_lengkap LIKE ?";
+                    $params[] = $searchTermLike;
+                    $types .= 's';
+                }
+            }
+            if (!empty($conditions)) {
+                if (strpos($sql, 'WHERE') === false) {
+                    $sql .= " WHERE " . implode(" AND ", $conditions);
+                } else {
+                    $sql .= " AND " . implode(" AND ", $conditions);
+                }
+            }
+            $stmt = $conn->prepare($sql);
+            if ($stmt) {
+                if (!empty($params)) {
+                    $stmt->bind_param($types, ...$params);
+                }
+                $stmt->execute();
+                $result = $stmt->get_result();
+                $row = $result->fetch_assoc();
+                $stmt->close();
+                return $row['total'];
+            }
+            return 0;
         }
 
-        $status = 'Belum Bayar';
-        if ($paymentForThisMonth >= $monthlyFee) {
-            $status = 'Lunas';
-        } elseif ($paymentForThisMonth > 0) {
-            $status = 'Kurang';
-            $kekurangan = $monthlyFee - $paymentForThisMonth;
-            $notes = 'Kurang ' . formatRupiah($kekurangan);
+        // =================================================================
+        // Logika Paginasi dan Pengambilan Data Utama
+        // =================================================================
+        $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'anggota';
+        $selectedYear = isset($_GET['year']) ? intval($_GET['year']) : date('Y');
+        $searchTerm = isset($_GET['search']) ? trim($_GET['search']) : '';
+        $limit = 10;
+        $page = isset($_GET['page']) ? intval($_GET['page']) : 1;
+        $start = ($page - 1) * $limit;
+        $anggota = [];
+        $kegiatan = [];
+        $keuangan = [];
+        $iuran = [];
+        $total_rows = countRowsWithFilter($conn, $active_tab, $searchTerm, $selectedYear);
+        $total_pages = ceil($total_rows / $limit);
+        if ($active_tab == 'anggota') {
+            $anggota = fetchDataWithPagination($conn, 'anggota', $start, $limit, $searchTerm);
+            $total_anggota = $total_rows;
+        } elseif ($active_tab == 'absensi') {
+            $anggota = fetchDataWithPagination($conn, 'absensi', $start, $limit, $searchTerm);
+        } elseif ($active_tab == 'kegiatan') {
+            $kegiatan = fetchDataWithPagination($conn, 'kegiatan', $start, $limit, $searchTerm);
+            $total_kegiatan = $total_rows;
+        } elseif ($active_tab == 'keuangan') {
+            $keuangan = fetchDataWithPagination($conn, 'keuangan', $start, $limit, $searchTerm, $selectedYear);
+        } elseif ($active_tab == 'iuran') {
+            $iuran = fetchDataWithPagination($conn, 'iuran', $start, $limit, $searchTerm, $selectedYear);
         }
 
-        $totalPaid += $paymentForThisMonth;
-        $totalExpected += $monthlyFee;
-        $duesData[] = [
-            'month' => $month,
-            'paid' => $paymentForThisMonth,
-            'status' => $status,
-            'notes' => $notes
-        ];
-        $currentMonth->modify('+1 month');
-    }
+        // =================================================================
+        // Logika untuk memproses absensi
+        // =================================================================
+        $message = '';
+        $messageType = '';
+        if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['absen_submit'])) {
+            $anggotaId = isset($_POST['anggota_id']) ? intval($_POST['anggota_id']) : 0;
+            $userLat = isset($_POST['latitude']) ? floatval($_POST['latitude']) : 0;
+            $userLon = isset($_POST['longitude']) ? floatval($_POST['longitude']) : 0;
 
-    $kekurangan = $totalExpected - $totalPaid;
-    return [
-        'member' => $memberData,
-        'breakdown' => $duesData,
-        'summary' => [
-            'total_paid' => $totalPaid,
-            'total_expected' => $totalExpected,
-            'shortfall' => $kekurangan
-        ]
-    ];
-}
+            // --- Ambil IP Address Klien ---
+            $clientIp = $_SERVER['REMOTE_ADDR'];
+            if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+                $clientIp = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR'])[0];
+            }
 
-/**
- * Fungsi untuk menentukan status pembayaran dan kelas badge.
- * @param int $totalPaid Jumlah yang telah dibayar.
- * @param int $totalExpected Jumlah yang seharusnya dibayar.
- * @return array Mengembalikan array berisi string status dan kelas CSS.
- */
-function getPaymentStatus($totalPaid, $totalExpected) {
-    if ($totalPaid >= $totalExpected) {
-        return ['status' => 'Lunas', 'class' => 'bg-success'];
-    } else {
-        return ['status' => 'Kurang', 'class' => 'bg-danger'];
-    }
-}
+            // --- Cooldown (Rate Limiting) ---
+            $cooldownSeconds = 43200;
+            $canProceed = true;
+            
+            $stmt = $conn->prepare("SELECT last_attempt_time FROM ip_attendance_cooldown WHERE ip_address = ?");
+            $stmt->bind_param("s", $clientIp);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $lastAttempt = $result->fetch_assoc();
+            $stmt->close();
 
-/**
- * Menghitung total baris untuk paginasi.
- * @param mysqli $conn Koneksi database.
- * @param string $tableName Nama tabel.
- * @param string|null $searchTerm Kata kunci pencarian.
- * @param int|null $filterYear Tahun filter.
- * @return int Total baris.
- */
-function countRowsWithFilter($conn, $tableName, $searchTerm = null, $filterYear = null) {
-    $sql = "";
-    $conditions = [];
-    $params = [];
-    $types = '';
+            if ($lastAttempt) {
+                $lastAttemptTime = new DateTime($lastAttempt['last_attempt_time']);
+                $currentTime = new DateTime();
+                $interval = $currentTime->getTimestamp() - $lastAttemptTime->getTimestamp();
 
-    if ($tableName === 'keuangan') {
-        $sql = "SELECT COUNT(*) AS total FROM keuangan k LEFT JOIN anggota a ON k.dicatat_oleh_id = a.id";
-    } elseif ($tableName === 'iuran' || $tableName === 'absensi') {
-        $sql = "SELECT COUNT(*) AS total FROM anggota";
-    } else {
-        $sql = "SELECT COUNT(*) AS total FROM `$tableName`";
-    }
+                if ($interval < $cooldownSeconds) {
+                    $message = "Anda sudah absen. Harap tunggu " . ($cooldownSeconds - $interval) . " detik sebelum mencoba lagi.";
+                    $messageType = "danger";
+                    $canProceed = false;
+                }
+            }
 
-    if ($filterYear) {
-        if ($tableName === 'keuangan') {
-            $conditions[] = "YEAR(k.tanggal_transaksi) = ?";
-            $params[] = $filterYear;
-            $types .= 'i';
-        }
-    }
-    if ($searchTerm) {
-        $searchTermLike = '%' . $searchTerm . '%';
-        if ($tableName === 'anggota' || $tableName === 'absensi') {
-             // PERBAIKAN: Hapus alias 'a' karena query utama tidak menggunakannya
-            $conditions[] = "(nama_lengkap LIKE ? OR jabatan LIKE ?)";
-            $params[] = $searchTermLike;
-            $params[] = $searchTermLike;
-            $types .= 'ss';
-        } elseif ($tableName === 'kegiatan') {
-            $conditions[] = "(nama_kegiatan LIKE ? OR deskripsi LIKE ? OR lokasi LIKE ?)";
-            $params[] = $searchTermLike;
-            $params[] = $searchTermLike;
-            $params[] = $searchTermLike;
-            $types .= 'sss';
-        } elseif ($tableName === 'keuangan') {
-            $conditions[] = "(k.jenis_transaksi LIKE ? OR k.deskripsi LIKE ? OR a.nama_lengkap LIKE ?)";
-            $params[] = $searchTermLike;
-            $params[] = $searchTermLike;
-            $params[] = $searchTermLike;
-            $types .= 'sss';
-        } elseif ($tableName === 'iuran') {
-            $sql = "SELECT COUNT(*) AS total FROM anggota a WHERE nama_lengkap LIKE ?";
-            $params[] = $searchTermLike;
-            $types .= 's';
-        }
-    }
-    if (!empty($conditions)) {
-        if (strpos($sql, 'WHERE') === false) {
-            $sql .= " WHERE " . implode(" AND ", $conditions);
-        } else {
-            $sql .= " AND " . implode(" AND ", $conditions);
-        }
-    }
-    $stmt = $conn->prepare($sql);
-    if ($stmt) {
-        if (!empty($params)) {
-            $stmt->bind_param($types, ...$params);
-        }
-        $stmt->execute();
-        $result = $stmt->get_result();
-        $row = $result->fetch_assoc();
-        $stmt->close();
-        return $row['total'];
-    }
-    return 0;
-}
+            // --- Ambil data lokasi absensi dari database ---
+            $stmt = $conn->prepare("SELECT latitude, longitude, toleransi_jarak FROM lokasi_absensi WHERE id = 1 LIMIT 1");
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $lokasiDb = $result->fetch_assoc();
+            $stmt->close();
 
-// =================================================================
-// Logika Paginasi dan Pengambilan Data Utama
-// =================================================================
-$active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'anggota';
-$selectedYear = isset($_GET['year']) ? intval($_GET['year']) : date('Y');
-$searchTerm = isset($_GET['search']) ? trim($_GET['search']) : '';
-$limit = 10;
-$page = isset($_GET['page']) ? intval($_GET['page']) : 1;
-$start = ($page - 1) * $limit;
-$anggota = [];
-$kegiatan = [];
-$keuangan = [];
-$iuran = [];
-$total_rows = countRowsWithFilter($conn, $active_tab, $searchTerm, $selectedYear);
-$total_pages = ceil($total_rows / $limit);
-if ($active_tab == 'anggota') {
-    $anggota = fetchDataWithPagination($conn, 'anggota', $start, $limit, $searchTerm);
-    $total_anggota = $total_rows;
-} elseif ($active_tab == 'absensi') {
-    $anggota = fetchDataWithPagination($conn, 'absensi', $start, $limit, $searchTerm);
-} elseif ($active_tab == 'kegiatan') {
-    $kegiatan = fetchDataWithPagination($conn, 'kegiatan', $start, $limit, $searchTerm);
-    $total_kegiatan = $total_rows;
-} elseif ($active_tab == 'keuangan') {
-    $keuangan = fetchDataWithPagination($conn, 'keuangan', $start, $limit, $searchTerm, $selectedYear);
-} elseif ($active_tab == 'iuran') {
-    $iuran = fetchDataWithPagination($conn, 'iuran', $start, $limit, $searchTerm, $selectedYear);
-}
-
-// =================================================================
-// Logika untuk memproses absensi
-// =================================================================
-$message = '';
-$messageType = '';
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['absen_submit'])) {
-    $anggotaId = isset($_POST['anggota_id']) ? intval($_POST['anggota_id']) : 0;
-    $userLat = isset($_POST['latitude']) ? floatval($_POST['latitude']) : 0;
-    $userLon = isset($_POST['longitude']) ? floatval($_POST['longitude']) : 0;
-
-    // --- Ambil IP Address Klien ---
-    $clientIp = $_SERVER['REMOTE_ADDR'];
-    if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-        $clientIp = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR'])[0];
-    }
-
-    // --- Cooldown (Rate Limiting) ---
-    $cooldownSeconds = 43200;
-    $canProceed = true;
-    
-    $stmt = $conn->prepare("SELECT last_attempt_time FROM ip_attendance_cooldown WHERE ip_address = ?");
-    $stmt->bind_param("s", $clientIp);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $lastAttempt = $result->fetch_assoc();
-    $stmt->close();
-
-    if ($lastAttempt) {
-        $lastAttemptTime = new DateTime($lastAttempt['last_attempt_time']);
-        $currentTime = new DateTime();
-        $interval = $currentTime->getTimestamp() - $lastAttemptTime->getTimestamp();
-
-        if ($interval < $cooldownSeconds) {
-            $message = "Anda sudah absen. Harap tunggu " . ($cooldownSeconds - $interval) . " detik sebelum mencoba lagi.";
-            $messageType = "danger";
-            $canProceed = false;
-        }
-    }
-
-    // --- Ambil data lokasi absensi dari database ---
-    $stmt = $conn->prepare("SELECT latitude, longitude, toleransi_jarak FROM lokasi_absensi WHERE id = 1 LIMIT 1");
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $lokasiDb = $result->fetch_assoc();
-    $stmt->close();
-
-    // Gunakan data dari database, jika tidak ada, gunakan nilai default sebagai fallback
-    $jarakToleransi = $lokasiDb['toleransi_jarak'] ?? 50; 
-    $lokasiPerkumpulan = [
-        'latitude' => $lokasiDb['latitude'] ?? -7.527444,
-        'longitude' => $lokasiDb['longitude'] ?? 110.628819
-    ];
+            // Gunakan data dari database, jika tidak ada, gunakan nilai default sebagai fallback
+            $jarakToleransi = $lokasiDb['toleransi_jarak'] ?? 50; 
+            $lokasiPerkumpulan = [
+                'latitude' => $lokasiDb['latitude'] ?? -7.527444,
+                'longitude' => $lokasiDb['longitude'] ?? 110.628819
+            ];
 
     if ($canProceed) {
         if ($anggotaId === 0 || empty($userLat) || empty($userLon)) {
@@ -1033,46 +1033,46 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['absen_submit'])) {
             <?php else: ?>
                 <h2 class="mb-4 text-primary"><i class="fa-solid fa-receipt me-2"></i>Rekapitulasi Iuran</h2>
                 <div class="row mb-3 gy-2 align-items-center">
-        <div class="col-12 col-md-6">
-        <form action="" method="GET" class="d-flex align-items-center w-100">
-            <input type="hidden" name="tab" value="iuran">
-            <label for="year-iuran" class="form-label mb-0 me-2 fw-bold">Pilih Tahun:</label>
-            <select class="form-select w-auto" id="year-iuran" name="year" onchange="this.form.submit()">
-                <?php
-                $currentYear = date('Y');
-                $resultYears = $conn->query("SELECT DISTINCT YEAR(tanggal_bayar) AS year FROM iuran ORDER BY year DESC");
-                $years = [];
-                if ($resultYears) {
-                    while ($row = $resultYears->fetch_assoc()) {
-                        $years[] = $row['year'];
-                    }
-                }
-                if (!in_array($currentYear, $years)) {
-                    $years[] = $currentYear;
-                    rsort($years);
-                }
+                    <div class="col-12 col-md-6">
+                        <form action="" method="GET" class="d-flex align-items-center w-100">
+                            <input type="hidden" name="tab" value="iuran">
+                            <label for="year-iuran" class="form-label mb-0 me-2 fw-bold">Pilih Tahun:</label>
+                            <select class="form-select w-auto" id="year-iuran" name="year" onchange="this.form.submit()">
+                                <?php
+                                $currentYear = date('Y');
+                                $resultYears = $conn->query("SELECT DISTINCT YEAR(tanggal_bayar) AS year FROM iuran ORDER BY year DESC");
+                                $years = [];
+                                if ($resultYears) {
+                                    while ($row = $resultYears->fetch_assoc()) {
+                                        $years[] = $row['year'];
+                                    }
+                                }
+                                if (!in_array($currentYear, $years)) {
+                                    $years[] = $currentYear;
+                                    rsort($years);
+                                }
 
-                foreach ($years as $year):
-                ?>
-                    <option value="<?= $year ?>" <?= ($year == $selectedYear) ? 'selected' : '' ?>><?= $year ?></option>
-                <?php endforeach; ?>
-            </select>
-        </form>
-        </div>
-            <div class="col-12 col-md-6">
-                <form action="" method="GET" class="d-flex w-100 justify-content-end">
-                    <input type="hidden" name="tab" value="iuran">
-                    <input type="hidden" name="year" value="<?= $selectedYear ?>">
-                    <div class="input-group">
-                        <input type="text" id="searchInputIuran" class="form-control" placeholder="Cari anggota..." name="search" value="<?= htmlspecialchars($searchTerm) ?>">
-                        <button class="btn btn-outline-primary" type="submit"><i class="fas fa-search"></i></button>
-                        <?php if (!empty($searchTerm)): ?>
-                            <a href="?tab=iuran&year=<?= $selectedYear ?>" class="btn btn-outline-secondary" title="Hapus Pencarian"><i class="fas fa-times"></i></a>
-                        <?php endif; ?>
+                                foreach ($years as $year):
+                                ?>
+                                    <option value="<?= $year ?>" <?= ($year == $selectedYear) ? 'selected' : '' ?>><?= $year ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </form>
                     </div>
-                </form>
-            </div>
-        </div>
+                    <div class="col-12 col-md-6">
+                        <form action="" method="GET" class="d-flex w-100 justify-content-end">
+                            <input type="hidden" name="tab" value="iuran">
+                            <input type="hidden" name="year" value="<?= $selectedYear ?>">
+                            <div class="input-group">
+                                <input type="text" id="searchInputIuran" class="form-control" placeholder="Cari anggota..." name="search" value="<?= htmlspecialchars($searchTerm) ?>">
+                                <button class="btn btn-outline-primary" type="submit"><i class="fas fa-search"></i></button>
+                                <?php if (!empty($searchTerm)): ?>
+                                    <a href="?tab=iuran&year=<?= $selectedYear ?>" class="btn btn-outline-secondary" title="Hapus Pencarian"><i class="fas fa-times"></i></a>
+                                <?php endif; ?>
+                            </div>
+                        </form>
+                    </div>
+                </div>
                 <div class="table-responsive">
                     <table class="table table-hover table-striped iuran-table">
                         <thead>
@@ -1087,7 +1087,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['absen_submit'])) {
                             <?php if (count($iuran) > 0): ?>
                                 <?php foreach ($iuran as $row): ?>
                                     <?php 
-                                        $monthlyFee = 10000;
+                                        $monthlyFee = DUES_MONTHLY_FEE;
                                         $stmt = $conn->prepare("SELECT bergabung_sejak FROM anggota WHERE id = ?");
                                         $stmt->bind_param("i", $row['anggota_id']);
                                         $stmt->execute();
@@ -1164,8 +1164,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['absen_submit'])) {
         </footer>
     </div>
 </div>
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
-
