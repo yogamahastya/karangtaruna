@@ -516,6 +516,7 @@
         }
     }
 }
+$profile_image = isset($row['foto_profil']) && !empty($row['foto_profil']) ? htmlspecialchars($row['foto_profil']) : 'https://img.freepik.com/free-psd/contact-icon-illustration-isolated_23-2151903337.jpg?semt=ais_hybrid&w=740'; // Ganti dengan URL gambar default yang sesuai
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -642,7 +643,7 @@
                             }
 
                             // Tentukan gambar profil atau ikon default
-                            $profile_image = isset($row['foto_profil']) && !empty($row['foto_profil']) ? htmlspecialchars($row['foto_profil']) : 'https://bootdey.com/img/Content/avatar/avatar1.png'; // Ganti dengan URL gambar default yang sesuai
+                            
                         ?>
                         <div class="col-xl-3 col-sm-6">
                             <div class="card">
@@ -751,7 +752,7 @@
                                             <div class="card-body">
                                                 <div class="d-flex align-items-center">
                                                     <div>
-                                                        <img src="https://bootdey.com/img/Content/avatar/avatar1.png" alt="" class="avatar-md rounded-circle img-thumbnail" />
+                                                        <img src="<?= $profile_image ?>" alt="" class="avatar-md rounded-circle img-thumbnail" />
                                                     </div>
                                                     <div class="flex-1 ms-3">
                                                         <h5 class="font-size-16 mb-1"><a href="#" class="text-dark"><?= htmlspecialchars($row['nama_lengkap']) ?></a></h5>

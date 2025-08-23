@@ -505,7 +505,7 @@ if ($result_lokasi && $result_lokasi->num_rows > 0) {
     $current_longitude = $lokasi_data['longitude'];
     $current_tolerance = $lokasi_data['toleransi_jarak'];
 }
-
+$profile_image = 'https://img.freepik.com/free-psd/contact-icon-illustration-isolated_23-2151903337.jpg?semt=ais_hybrid&w=740'; // Ganti dengan URL gambar default yang sesuai
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -639,7 +639,7 @@ if ($result_lokasi && $result_lokasi->num_rows > 0) {
                                     }
 
                                     // Tentukan gambar profil atau ikon default
-                                    $profile_image = 'https://bootdey.com/img/Content/avatar/avatar1.png'; // Ganti dengan URL gambar default yang sesuai
+                                    
                                 ?>
                                 <div class="col-xl-3 col-sm-6">
                                     <div class="card">
