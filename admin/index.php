@@ -1317,46 +1317,52 @@ $profile_image = 'https://img.freepik.com/free-psd/contact-icon-illustration-iso
             <?php endif; ?>
 
                 <div class="modal fade" id="addLokasiModal" tabindex="-1" aria-labelledby="addLokasiModalLabel" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="addLokasiModalLabel"><i class="fa-solid fa-map-marker-alt me-2"></i>Atur Lokasi Absensi</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <form action="" method="POST">
-                                <div class="modal-body">
-                                    <input type="hidden" name="action" value="update_location">
-                                    
-                                    <div class="mb-3">
-                                        <button type="button" class="btn btn-info" id="detect-device-location-btn">
-                                            <i class="fas fa-crosshairs me-2"></i>Gunakan Lokasi Perangkat Sekarang
-                                        </button>
-                                    </div>
-
-                                    <div class="mb-3">
-                                        <label for="lokasi_latitude" class="form-label">Latitude</label>
-                                        <input type="text" class="form-control" id="lokasi_latitude" name="lokasi_latitude" required value="<?= htmlspecialchars($current_latitude) ?>" readonly>
-                                        <div class="form-text">Latitude akan otomatis terisi setelah deteksi lokasi perangkat.</div>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="lokasi_longitude" class="form-label">Longitude</label>
-                                        <input type="text" class="form-control" id="lokasi_longitude" name="lokasi_longitude" required value="<?= htmlspecialchars($current_longitude) ?>" readonly>
-                                        <div class="form-text">Longitude akan otomatis terisi setelah deteksi lokasi perangkat.</div>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="jarak_toleransi" class="form-label">Jarak Toleransi (meter)</label>
-                                        <input type="number" class="form-control" id="jarak_toleransi" name="jarak_toleransi" required value="<?= htmlspecialchars($current_tolerance) ?>">
-                                        <div class="form-text">Jarak maksimal dari lokasi yang diizinkan untuk absensi.</div>
-                                    </div>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                                    <button type="submit" class="btn btn-primary">Simpan Lokasi</button>
-                                </div>
-                            </form>
-                        </div>
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addLokasiModalLabel"><i class="fa-solid fa-map-marker-alt me-2"></i>Atur Lokasi Absensi</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="" method="POST">
+                <div class="modal-body">
+                    <input type="hidden" name="action" value="update_location">
+                    
+                    <div class="mb-3">
+                        <button type="button" class="btn btn-info" id="detect-device-location-btn">
+                            <i class="fas fa-crosshairs me-2"></i>Gunakan Lokasi Perangkat Sekarang
+                        </button>
                     </div>
-                </div>   
+
+                    <div id="map-container" style="height: 250px; width: 100%; margin-bottom: 15px;">
+                        <iframe id="gmaps-iframe" width="100%" height="100%" frameborder="0" style="border:0"
+                            src="" allowfullscreen>
+                        </iframe>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="lokasi_latitude" class="form-label">Latitude</label>
+                        <input type="text" class="form-control" id="lokasi_latitude" name="lokasi_latitude" required value="<?= htmlspecialchars($current_latitude) ?>" readonly>
+                        <div class="form-text">Latitude akan otomatis terisi setelah deteksi lokasi perangkat.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="lokasi_longitude" class="form-label">Longitude</label>
+                        <input type="text" class="form-control" id="lokasi_longitude" name="lokasi_longitude" required value="<?= htmlspecialchars($current_longitude) ?>" readonly>
+                        <div class="form-text">Longitude akan otomatis terisi setelah deteksi lokasi perangkat.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="jarak_toleransi" class="form-label">Jarak Toleransi (meter)</label>
+                        <input type="number" class="form-control" id="jarak_toleransi" name="jarak_toleransi" required value="<?= htmlspecialchars($current_tolerance) ?>">
+                        <div class="form-text">Jarak maksimal dari lokasi yang diizinkan untuk absensi.</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan Lokasi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>  
                 <footer class="text-center mt-5">
                     <div class="copyright-box">
                         <p class="copyright-text" style="font-size: 0.8rem;">
@@ -1807,7 +1813,8 @@ $profile_image = 'https://img.freepik.com/free-psd/contact-icon-illustration-iso
     </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="../assets/js/admin.js"></script>
+<!--<script src="../assets/js/admin.js"></script>-->
+<script src="../assets/js/maps.js"></script> 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         // Ambil daftar anggota dari PHP dan konversi ke JavaScript
@@ -1916,6 +1923,6 @@ $profile_image = 'https://img.freepik.com/free-psd/contact-icon-illustration-iso
         });
     }   
 });
-</script>    
+</script>   
 </body>
 </html>
