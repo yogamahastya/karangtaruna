@@ -526,6 +526,9 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/boxicons/2.1.0/css/boxicons.min.css" integrity="sha512-pVCM5+SN2+qwj36KonHToF2p1oIvoU3bsqxphdOIWMYmgr4ZqD3t5DjKvvetKhXGc/ZG5REYTT6ltKfExEei/Q==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/MaterialDesign-Webfont/5.3.45/css/materialdesignicons.css" integrity="sha256-NAxhqDvtY0l4xn+YVa6WjAcmd94NNfttjNsDmNatFVc=" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    
     <link rel="stylesheet" href="assets/css/styleindex.css"> 
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
@@ -600,63 +603,80 @@
             </style>
             <div class="table-responsive">
                 <table class="table table-hover table-striped" id="anggotaTable">
-                    <thead>
+                <!--    <thead>
                         <tr>
                             <th scope="col">Nama Lengkap</th>
                             <th scope="col">Jabatan</th>
                             <th scope="col">Bergabung Sejak</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <?php if (count($anggota) > 0): ?>
-                            <?php foreach ($anggota as $row): ?>
-                                <tr>
-                                    <td data-label="Nama Lengkap"><i class="fa-solid fa-user-circle me-2"></i><?= htmlspecialchars($row['nama_lengkap']) ?></td>
-                                    <td data-label="Jabatan">
-                                        <?php
-                                            $jabatan = htmlspecialchars($row['jabatan']);
-                                            $badge_class = '';
+                -->
+                    <?php if (count($anggota) > 0): ?>
+                    <div class="row">
+                    <?php foreach ($anggota as $row): ?>
+                        <?php
+                            // Tentukan kelas CSS badge berdasarkan nilai jabatan
+                            $jabatan = htmlspecialchars($row['jabatan']);
+                            $badge_class = 'badge '; // Kelas dasar untuk badge
 
-                                            // Tentukan kelas CSS berdasarkan nilai jabatan
-                                            switch (strtolower($jabatan)) {
-                                                case 'ketua':
-                                                    $badge_class = 'ketua';
-                                                    break;
-                                                case 'wakil ketua':
-                                                    $badge_class = 'wakilketua';
-                                                    break;
-                                                case 'sekretaris':
-                                                    $badge_class = 'sekretaris';
-                                                    break;
-                                                case 'bendahara':
-                                                    $badge_class = 'bendahara';
-                                                    break;
-                                                case 'anggota':
-                                                    $badge_class = 'anggota';
-                                                    break;
-                                                case 'humas':
-                                                    $badge_class = 'humas';
-                                                    break;
-                                                default:
-                                                    // Jika jabatan tidak dikenali, tidak perlu menambahkan kelas badge
-                                                    $badge_class = '';
-                                                    break;
-                                            }
-                                        ?>
+                            switch (strtolower($jabatan)) {
+                                case 'ketua':
+                                case 'ketua': // Menambahkan jabatan contoh
+                                    $badge_class .= 'ketua';
+                                    break;
+                                case 'wakil ketua': // Menambahkan jabatan contoh
+                                    $badge_class .= 'wakilketua';
+                                    break;
+                                case 'sekretaris': // Menambahkan jabatan contoh
+                                    $badge_class .= 'sekretaris';
+                                    break;
+                                case 'bendahara': // Menambahkan jabatan contoh
+                                    $badge_class .= 'bendahara';
+                                    break;
+                                case 'humas': // Menambahkan jabatan contoh
+                                    $badge_class .= 'humas';
+                                    break;
+                                default:
+                                    $badge_class .= 'anggota'; // Kelas default jika jabatan tidak cocok
+                                    break;
+                            }
 
-                                        <span class="badge <?= $badge_class ?>">
-                                            <?= $jabatan ?>
-                                        </span>
-                                    </td>
-                                    <td data-label="Bergabung Sejak"><?= htmlspecialchars($row['bergabung_sejak']) ?></td>
-                                </tr>
-                            <?php endforeach; ?>
-                        <?php else: ?>
-                            <tr>
-                                <td colspan="3" class="text-center text-muted">Tidak ada data anggota.</td>
-                            </tr>
-                        <?php endif; ?>
-                    </tbody>
+                            // Tentukan gambar profil atau ikon default
+                            $profile_image = isset($row['foto_profil']) && !empty($row['foto_profil']) ? htmlspecialchars($row['foto_profil']) : 'https://bootdey.com/img/Content/avatar/avatar1.png'; // Ganti dengan URL gambar default yang sesuai
+                        ?>
+                        <div class="col-xl-3 col-sm-6">
+                            <div class="card">
+                                <div class="card-body">
+                                    <!--<div class="dropdown float-end">
+                                        <a class="text-muted dropdown-toggle font-size-16" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true"><i class="bx bx-dots-horizontal-rounded"></i></a>
+                                        <div class="dropdown-menu dropdown-menu-end">
+                                            <a class="dropdown-item" href="#">Edit</a>
+                                            <a class="dropdown-item" href="#">Hapus</a>
+                                            <a class="dropdown-item" href="#">Lihat Profil</a>
+                                        </div>
+                                    </div>-->
+                                    <div class="d-flex align-items-center">
+                                        <div><img src="<?= $profile_image ?>" alt="<?= htmlspecialchars($row['nama_lengkap']) ?>" class="avatar-md rounded-circle img-thumbnail" /></div>
+                                        <div class="flex-1 ms-3">
+                                            <h5 class="font-size-16 mb-1"><a href="#" class="text-dark"><?= htmlspecialchars($row['nama_lengkap']) ?></a></h5>
+                                            <span class="<?= $badge_class ?> mb-0"><?= $jabatan ?></span>
+                                        </div>
+                                    </div>
+                                    <div class="mt-3 pt-1">
+                                        <p class="text-muted mb-0"><i class="mdi mdi-calendar font-size-15 align-middle pe-2 text-primary"></i> Bergabung: <?= htmlspecialchars($row['bergabung_sejak']) ?></p>
+                                        </div>
+                                    <!--<div class="d-flex gap-2 pt-4">
+                                        <button type="button" class="btn btn-soft-primary btn-sm w-50"><i class="bx bx-user me-1"></i> Profil</button>
+                                        <button type="button" class="btn btn-primary btn-sm w-50"><i class="bx bx-message-square-dots me-1"></i> Kontak</button>
+                                    </div>-->
+                                </div>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                    </div>
+                <?php else: ?>
+                    <div class="text-center text-muted">Tidak ada data anggota.</div>
+                <?php endif; ?>
                 </table>
             </div>
             <nav aria-label="Page navigation example">
@@ -703,58 +723,74 @@
             <?php if (count($anggota) > 0): ?>
                 <div class="table-responsive">
                     <table class="table table-hover table-striped">
-                        <thead>
+                    <!--   <thead>
                             <tr>
                                 <th scope="col">Nama Lengkap</th>
                                 <th scope="col">Status Absensi</th>
                                 <th scope="col">Aksi</th>
                             </tr>
                         </thead>
+                    -->
                         <tbody>
-                            <?php 
-                            foreach ($anggota as $row): 
-                                $stmt = $conn->prepare("SELECT COUNT(*) FROM absensi WHERE anggota_id = ? AND DATE(tanggal_absen) = CURDATE()");
-                                if (!$stmt) {
-                                    die("Prepare failed for absensi check: " . $conn->error);
-                                }
-                                $stmt->bind_param("i", $row['id']);
-                                $stmt->execute();
-                                $stmt->bind_result($isAbsent);
-                                $stmt->fetch();
-                                $stmt->close();
-                            ?>
-                                <tr>
-                                    <td data-label="Nama Lengkap"><i class="fa-solid fa-user-circle me-2"></i><?= htmlspecialchars($row['nama_lengkap']) ?></td>
-                                    <td data-label="Status Absensi">
-                                        <?php if ($isAbsent > 0): ?>
-                                            <span class="badge bg-success">Hadir</span>
-                                        <?php else: ?>
-                                            <span class="badge bg-danger">Belum Hadir</span>
-                                        <?php endif; ?>
-                                    </td>
-                                    <td data-label="Aksi">
-                                        <?php if ($isAbsent == 0): ?>
-                                            <form id="formAbsen_<?= $row['id'] ?>" method="POST">
-                                                <input type="hidden" name="absen_submit" value="1">
-                                                <input type="hidden" name="anggota_id" value="<?= $row['id'] ?>">
-                                                <input type="hidden" name="latitude" id="userLat_<?= $row['id'] ?>">
-                                                <input type="hidden" name="longitude" id="userLon_<?= $row['id'] ?>">
-                                                <button type="button" class="btn btn-sm btn-primary" onclick="getLocationAndSubmit(<?= $row['id'] ?>)">
-                                                    Absen
-                                                </button>
-                                            </form>
-                                        <?php else: ?>
-                                            <button class="btn btn-sm btn-secondary" disabled>Sudah Absen</button>
-                                        <?php endif; ?>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
+                            <div class="">
+                                <div class="row">
+                                    <?php 
+                                    foreach ($anggota as $row): 
+                                        $stmt = $conn->prepare("SELECT COUNT(*) FROM absensi WHERE anggota_id = ? AND DATE(tanggal_absen) = CURDATE()");
+                                        if (!$stmt) {
+                                            die("Prepare failed for absensi check: " . $conn->error);
+                                        }
+                                        $stmt->bind_param("i", $row['id']);
+                                        $stmt->execute();
+                                        $stmt->bind_result($isAbsent);
+                                        $stmt->fetch();
+                                        $stmt->close();
+                                    ?>
+                                    <div class="col-xl-3 col-sm-6">
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <div class="d-flex align-items-center">
+                                                    <div>
+                                                        <img src="https://bootdey.com/img/Content/avatar/avatar1.png" alt="" class="avatar-md rounded-circle img-thumbnail" />
+                                                    </div>
+                                                    <div class="flex-1 ms-3">
+                                                        <h5 class="font-size-16 mb-1"><a href="#" class="text-dark"><?= htmlspecialchars($row['nama_lengkap']) ?></a></h5>
+                                                        <?php if ($isAbsent > 0): ?>
+                                                            <span class="badge badge-soft-success mb-0">Hadir</span>
+                                                        <?php else: ?>
+                                                            <span class="badge badge-soft-danger mb-0">Belum Hadir</span>
+                                                        <?php endif; ?>
+                                                    </div>
+                                                </div>
+                                                <div class="d-flex gap-2 pt-4">
+                                                    <?php if ($isAbsent == 0): ?>
+                                                        <form id="formAbsen_<?= $row['id'] ?>" method="POST" class="w-100">
+                                                            <input type="hidden" name="absen_submit" value="1">
+                                                            <input type="hidden" name="anggota_id" value="<?= $row['id'] ?>">
+                                                            <input type="hidden" name="latitude" id="userLat_<?= $row['id'] ?>">
+                                                            <input type="hidden" name="longitude" id="userLon_<?= $row['id'] ?>">
+                                                            <button type="button" class="btn btn-primary btn-sm w-100" onclick="getLocationAndSubmit(<?= $row['id'] ?>)">
+                                                                <i class="bx bx-check me-1"></i> Absen
+                                                            </button>
+                                                        </form>
+                                                    <?php else: ?>
+                                                        <button class="btn btn-soft-secondary btn-sm w-100" disabled>
+                                                            <i class="bx bx-check-circle me-1"></i> Sudah Absen
+                                                        </button>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <?php endforeach; ?>
+                                </div>
+                            </div>
                         </tbody>
                     </table>
                 </div>
             <?php else: ?>
                 <div class="alert alert-warning" role="alert">
-                    <i class="fa-solid fa-exclamation-triangle me-2"></i> **Peringatan:** Bagian ini kosong karena Anda tidak memiliki data**. Silakan tambahkan anggota terlebih dahulu.
+                    <i class="fa-solid fa-exclamation-triangle me-2"></i> **Peringatan:** Bagian ini kosong karena **tabel 'anggota' di database Anda tidak memiliki data**. Silakan tambahkan anggota terlebih dahulu.
                 </div>
             <?php endif; ?>
             <nav aria-label="Page navigation example">
@@ -826,26 +862,48 @@
             </div>
             <div class="table-responsive">
                 <table class="table table-hover table-striped" id="kegiatanTable">
-                    <thead>
+                    <!--<thead>
                         <tr>
                             <th scope="col">Nama Kegiatan</th>
                             <th scope="col">Lokasi</th>
                             <th scope="col">Tanggal Mulai</th>
                         </tr>
-                    </thead>
+                    </thead>-->
                     <tbody>
                         <?php if (count($kegiatan) > 0): ?>
-                            <?php foreach ($kegiatan as $row): ?>
-                                <tr>
-                                    <td data-label="Nama Kegiatan"><?= htmlspecialchars($row['nama_kegiatan']) ?></td>
-                                    <td data-label="Lokasi"><?= htmlspecialchars($row['lokasi']) ?></td>
-                                    <td data-label="Tanggal Mulai"><?= htmlspecialchars($row['tanggal_mulai']) ?></td>
-                                </tr>
-                            <?php endforeach; ?>
+                            <div class="row">
+                                <?php foreach ($kegiatan as $row): ?>
+                                    <div class="col-xl-3 col-sm-6">
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="avatar-md">
+                                                        <div class="avatar-title bg-soft-primary text-primary display-6 m-0 rounded-circle">
+                                                            <i class="bx bx-calendar-event"></i>
+                                                        </div>
+                                                    </div>
+                                                    <div class="flex-1 ms-3">
+                                                        <h5 class="font-size-16 mb-1"><a href="#" class="text-dark"><?= htmlspecialchars($row['nama_kegiatan']) ?></a></h5>
+                                                        <span class="badge badge-soft-success mb-0">Aktif</span>
+                                                    </div>
+                                                </div>
+                                                <div class="mt-3 pt-1">
+                                                    <p class="text-muted mb-0"><i class="mdi mdi-map-marker-outline font-size-15 align-middle pe-2 text-primary"></i> <?= htmlspecialchars($row['lokasi']) ?></p>
+                                                    <p class="text-muted mb-0 mt-2"><i class="mdi mdi-calendar-range font-size-15 align-middle pe-2 text-primary"></i> <?= htmlspecialchars($row['tanggal_mulai']) ?></p>
+                                                </div>
+                                                <!--<div class="d-flex gap-2 pt-4">
+                                                    <button type="button" class="btn btn-soft-primary btn-sm w-50"><i class="bx bx-info-circle me-1"></i> Detail</button>
+                                                    <button type="button" class="btn btn-primary btn-sm w-50"><i class="bx bx-plus me-1"></i> Bergabung</button>
+                                                </div>-->
+                                            </div>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
                         <?php else: ?>
-                            <tr>
-                                <td colspan="3" class="text-center text-muted">Tidak ada data kegiatan.</td>
-                            </tr>
+                            <div class="col-12 text-center text-muted mt-5">
+                                <p>Tidak ada data kegiatan.</p>
+                            </div>
                         <?php endif; ?>
                     </tbody>
                 </table>
@@ -910,7 +968,7 @@
             </div>
             <div class="table-responsive">
                 <table class="table table-hover table-striped" id="keuanganTable">
-                    <thead>
+                <!--    <thead>
                         <tr>
                             <th scope="col">Jenis Transaksi</th>
                             <th scope="col">Jumlah</th>
@@ -918,25 +976,46 @@
                             <th scope="col">Tanggal</th>
                         </tr>
                     </thead>
+                -->
                     <tbody>
                         <?php if (count($keuangan) > 0): ?>
+                        <div class="row">
                             <?php foreach ($keuangan as $row): ?>
-                                <tr>
-                                    <td data-label="Jenis Transaksi">
-                                        <span class="badge rounded-pill <?= ($row['jenis_transaksi'] == 'pemasukan') ? 'bg-success' : 'bg-danger' ?>">
-                                            <?= htmlspecialchars(ucfirst($row['jenis_transaksi'])) ?>
-                                        </span>
-                                    </td>
-                                    <td data-label="Jumlah"><?= htmlspecialchars(formatRupiah($row['jumlah'])) ?></td>
-                                    <td data-label="Deskripsi"><?= htmlspecialchars($row['deskripsi']) ?></td>
-                                    <td data-label="Tanggal"><?= htmlspecialchars($row['tanggal_transaksi']) ?></td>
-                                </tr>
+                                <?php 
+                                    $isPemasukan = ($row['jenis_transaksi'] == 'pemasukan');
+                                    $badge_class = $isPemasukan ? 'badge-soft-success' : 'badge-soft-danger';
+                                    $icon_class = $isPemasukan ? 'mdi mdi-arrow-down-bold' : 'mdi mdi-arrow-up-bold';
+                                    $title_text = $isPemasukan ? 'Pemasukan' : 'Pengeluaran';
+                                    $amount_color = $isPemasukan ? 'text-success' : 'text-danger';
+                                ?>
+                                <div class="col-xl-3 col-sm-6">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <div class="d-flex align-items-center">
+                                                <div class="avatar-md">
+                                                    <div class="avatar-title bg-soft-primary text-primary display-6 m-0 rounded-circle">
+                                                        <i class="<?= $icon_class ?>"></i>
+                                                    </div>
+                                                </div>
+                                                <div class="flex-1 ms-3">
+                                                    <h5 class="font-size-16 mb-1"><a href="#" class="text-dark"><?= htmlspecialchars($title_text) ?></a></h5>
+                                                    <span class="badge <?= $badge_class ?> mb-0"><?= htmlspecialchars(ucfirst($row['deskripsi'])) ?></span>
+                                                </div>
+                                            </div>
+                                            <div class="mt-3 pt-1">
+                                                <h4 class="<?= $amount_color ?> mb-0"><?= htmlspecialchars(formatRupiah($row['jumlah'])) ?></h4>
+                                                <p class="text-muted mb-0 mt-2"><i class="mdi mdi-calendar-range font-size-15 align-middle pe-2 text-primary"></i> <?= htmlspecialchars($row['tanggal_transaksi']) ?></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             <?php endforeach; ?>
-                        <?php else: ?>
-                            <tr>
-                                <td colspan="4" class="text-center text-muted">Tidak ada data keuangan untuk tahun ini.</td>
-                            </tr>
-                        <?php endif; ?>
+                        </div>
+                    <?php else: ?>
+                        <div class="col-12 text-center text-muted mt-5">
+                            <p>Tidak ada data keuangan untuk tahun ini.</p>
+                        </div>
+                    <?php endif; ?>
                     </tbody>
                 </table>
             </div>
@@ -977,28 +1056,33 @@
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-md-7 mb-4">
+                    <div class="col-xl-6 col-md-12 mb-4">
                         <div class="card h-100 shadow-sm">
                             <div class="card-body">
-                                <h5 class="card-title"><i class="fa-solid fa-list-check me-2"></i>Rincian Bulanan (Tahun <?= $selectedYear ?>)</h5>
+                                <h5 class="card-title"><i class="bx bx-list-check me-2"></i>Rincian Bulanan (Tahun <?= $selectedYear ?>)</h5>
                                 <ul class="list-group list-group-flush">
                                     <?php if (count($memberDuesBreakdown['breakdown']) > 0): ?>
                                         <?php foreach ($memberDuesBreakdown['breakdown'] as $item): ?>
                                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                                <span>
-                                                    <strong><?= htmlspecialchars($item['month']) ?>:</strong>
-                                                    <?= formatRupiah($item['paid']) ?>
-                                                    <?php if (!empty($item['notes'])): ?>
-                                                        <small class="text-danger fw-bold ms-2">(<?= htmlspecialchars($item['notes']) ?>)</small>
-                                                    <?php endif; ?>
-                                                </span>
-                                                <span>
-                                                    <?php if ($item['status'] == 'Lunas'): ?>
-                                                        <span class="badge bg-success">Lunas</span>
-                                                    <?php else: ?>
-                                                        <span class="badge bg-danger">Kurang</span>
-                                                    <?php endif; ?>
-                                                </span>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="avatar-sm">
+                                                        <div class="avatar-title bg-soft-primary text-primary m-0 rounded-circle">
+                                                            <i class="mdi mdi-calendar-month"></i>
+                                                        </div>
+                                                    </div>
+                                                    <div class="ms-3">
+                                                        <h6 class="mb-0"><?= htmlspecialchars($item['month']) ?></h6>
+                                                        <small class="text-muted"><?= formatRupiah($item['paid']) ?></small>
+                                                        <?php if (!empty($item['notes'])): ?>
+                                                            <small class="text-danger fw-bold ms-2">(<?= htmlspecialchars($item['notes']) ?>)</small>
+                                                        <?php endif; ?>
+                                                    </div>
+                                                </div>
+                                                <?php 
+                                                    $badgeClass = (strtolower($item['status']) == 'lunas') ? 'badge-soft-success' : 'badge-soft-danger';
+                                                    $statusText = (strtolower($item['status']) == 'lunas') ? 'Lunas' : 'Kurang';
+                                                ?>
+                                                <span class="badge <?= $badgeClass ?>"><?= $statusText ?></span>
                                             </li>
                                         <?php endforeach; ?>
                                     <?php else: ?>
@@ -1008,22 +1092,22 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-5 mb-4">
+                    <div class="col-xl-6 col-md-12 mb-4">
                         <div class="card h-100 shadow-sm">
                             <div class="card-body">
-                                <h5 class="card-title"><i class="fa-solid fa-chart-pie me-2"></i>Ringkasan</h5>
+                                <h5 class="card-title"><i class="bx bx-chart me-2"></i>Ringkasan Keuangan</h5>
                                 <ul class="list-group list-group-flush">
                                     <li class="list-group-item d-flex justify-content-between">
-                                        <span>Total Pembayaran</span>
-                                        <span class="fw-bold text-success"><?= formatRupiah($memberDuesBreakdown['summary']['total_paid']) ?></span>
+                                        <span class="d-flex align-items-center"><i class="mdi mdi-check-circle-outline font-size-18 me-2 text-success"></i> Total Pembayaran</span>
+                                        <h6 class="fw-bold text-success mb-0"><?= formatRupiah($memberDuesBreakdown['summary']['total_paid']) ?></h6>
                                     </li>
                                     <li class="list-group-item d-flex justify-content-between">
-                                        <span>Total Seharusnya</span>
-                                        <span class="fw-bold text-primary"><?= formatRupiah($memberDuesBreakdown['summary']['total_expected']) ?></span>
+                                        <span class="d-flex align-items-center"><i class="mdi mdi-currency-usd font-size-18 me-2 text-primary"></i> Total Seharusnya</span>
+                                        <h6 class="fw-bold text-primary mb-0"><?= formatRupiah($memberDuesBreakdown['summary']['total_expected']) ?></h6>
                                     </li>
                                     <li class="list-group-item d-flex justify-content-between">
-                                        <span>Kekurangan</span>
-                                        <span class="fw-bold text-danger"><?= formatRupiah($memberDuesBreakdown['summary']['shortfall']) ?></span>
+                                        <span class="d-flex align-items-center"><i class="mdi mdi-alert-circle-outline font-size-18 me-2 text-danger"></i> Kekurangan</span>
+                                        <h6 class="fw-bold text-danger mb-0"><?= formatRupiah($memberDuesBreakdown['summary']['shortfall']) ?></h6>
                                     </li>
                                 </ul>
                             </div>
@@ -1075,7 +1159,7 @@
                 </div>
                 <div class="table-responsive">
                     <table class="table table-hover table-striped iuran-table">
-                        <thead>
+                    <!--   <thead>
                             <tr>
                                 <th scope="col">ID Anggota</th>
                                 <th scope="col">Nama Anggota</th>
@@ -1083,12 +1167,17 @@
                                 <th scope="col">Status</th>
                             </tr>
                         </thead>
+                    -->
                         <tbody>
                             <?php if (count($iuran) > 0): ?>
+                            <div class="row">
                                 <?php foreach ($iuran as $row): ?>
                                     <?php 
                                         $monthlyFee = DUES_MONTHLY_FEE;
                                         $stmt = $conn->prepare("SELECT bergabung_sejak FROM anggota WHERE id = ?");
+                                        if (!$stmt) {
+                                            die("Prepare failed for anggota check: " . $conn->error);
+                                        }
                                         $stmt->bind_param("i", $row['anggota_id']);
                                         $stmt->execute();
                                         $result = $stmt->get_result();
@@ -1113,28 +1202,52 @@
                                         $totalSeharusnya = $months * $monthlyFee;
                                         $statusData = getPaymentStatus($row['total_bayar'], $totalSeharusnya);
                                         $status = $statusData['status'];
-                                        $badgeClass = $statusData['class'];
+                                        
+                                        // Menggunakan kelas badge dari Bootstrap dan CSS yang Anda berikan
+                                        $badgeClass = '';
+                                        if (strtolower($status) == 'lunas') {
+                                            $badgeClass = 'badge-soft-success';
+                                        } elseif (strtolower($status) == 'kurang') {
+                                            $badgeClass = 'badge-soft-warning';
+                                        } elseif (strtolower($status) == 'belum bayar') {
+                                            $badgeClass = 'badge-soft-danger';
+                                        } else {
+                                            $badgeClass = 'badge-soft-secondary'; // Default
+                                        }
                                     ?>
-                                    <tr>
-                                        <td data-label="ID Anggota"><?= htmlspecialchars($row['anggota_id']) ?></td>
-                                        <td data-label="Nama Anggota">
-                                            <a href="?tab=iuran&member_id=<?= htmlspecialchars($row['anggota_id']) ?>&year=<?= $selectedYear ?>">
-                                                <i class="fa-solid fa-user-circle me-2"></i><?= htmlspecialchars($row['nama_lengkap']) ?>
-                                            </a>
-                                        </td>
-                                        <td data-label="Total Bayar"><?= htmlspecialchars(formatRupiah($row['total_bayar'])) ?></td>
-                                        <td data-label="Status">
-                                            <span class="badge rounded-pill <?= $badgeClass ?>">
-                                                <?= $status ?>
-                                            </span>
-                                        </td>
-                                    </tr>
+                                    <div class="col-xl-3 col-sm-6">
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="avatar-md">
+                                                        <div class="avatar-title bg-soft-primary text-primary display-6 m-0 rounded-circle">
+                                                            <i class="bx bxs-wallet"></i>
+                                                        </div>
+                                                    </div>
+                                                    <div class="flex-1 ms-3">
+                                                        <h5 class="font-size-16 mb-1"><a href="?tab=iuran&member_id=<?= htmlspecialchars($row['anggota_id']) ?>&year=<?= $selectedYear ?>" class="text-dark"><?= htmlspecialchars($row['nama_lengkap']) ?></a></h5>
+                                                        <span class="badge <?= $badgeClass ?> mb-0"><?= $status ?></span>
+                                                    </div>
+                                                </div>
+                                                <div class="mt-3 pt-1">
+                                                    <p class="text-muted mb-0"><i class="mdi mdi-currency-usd font-size-15 align-middle pe-2 text-primary"></i> Total Dibayar: <?= htmlspecialchars(formatRupiah($row['total_bayar'])) ?></p>
+                                                    <p class="text-muted mb-0 mt-2"><i class="mdi mdi-alert-circle-outline font-size-15 align-middle pe-2 text-primary"></i> Seharusnya: <?= htmlspecialchars(formatRupiah($totalSeharusnya)) ?></p>
+                                                </div>
+                                                <div class="d-flex gap-2 pt-4">
+                                                    <a href="?tab=iuran&member_id=<?= htmlspecialchars($row['anggota_id']) ?>&year=<?= $selectedYear ?>" class="btn btn-soft-primary btn-sm w-100">
+                                                        <i class="bx bx-receipt me-1"></i> Detail Riwayat
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 <?php endforeach; ?>
-                            <?php else: ?>
-                                <tr>
-                                    <td colspan="4" class="text-center text-muted">Tidak ada data iuran untuk tahun ini.</td>
-                                </tr>
-                            <?php endif; ?>
+                            </div>
+                        <?php else: ?>
+                            <div class="col-12 text-center text-muted mt-5">
+                                <p>Tidak ada data iuran untuk tahun ini.</p>
+                            </div>
+                        <?php endif; ?>
                         </tbody>
                     </table>
                 </div>

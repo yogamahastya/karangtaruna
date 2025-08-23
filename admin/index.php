@@ -516,6 +516,9 @@ if ($result_lokasi && $result_lokasi->num_rows > 0) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/boxicons/2.1.0/css/boxicons.min.css" integrity="sha512-pVCM5+SN2+qwj36KonHToF2p1oIvoU3bsqxphdOIWMYmgr4ZqD3t5DjKvvetKhXGc/ZG5REYTT6ltKfExEei/Q==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/MaterialDesign-Webfont/5.3.45/css/materialdesignicons.css" integrity="sha256-NAxhqDvtY0l4xn+YVa6WjAcmd94NNfttjNsDmNatFVc=" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    
     <link rel="stylesheet" href="../assets/css/styleadmin.css">
     <link rel="stylesheet" href="../assets/css/styleindex.css">
     <link rel="stylesheet" href="../assets/css/style.css"> 
@@ -595,7 +598,7 @@ if ($result_lokasi && $result_lokasi->num_rows > 0) {
             </div>
             <div class="table-responsive">
                 <table class="table table-hover table-striped d-none d-md-table">
-                    <thead>
+                    <!--<thead>
                         <tr>
                             <th scope="col">ID</th>
                             <th scope="col">Nama Lengkap</th>
@@ -603,67 +606,82 @@ if ($result_lokasi && $result_lokasi->num_rows > 0) {
                             <th scope="col">Bergabung Sejak</th>
                             <th scope="col">Aksi</th>
                         </tr>
-                    </thead>
+                    </thead>-->
                     <tbody>
                         <?php if (count($anggota) > 0): ?>
+                        <div class="row">
                             <?php foreach ($anggota as $row): ?>
-                                <tr>
-                                    <td><?= htmlspecialchars($row['id']) ?></td>
-                                    <td><i class="fa-solid fa-user-circle me-2"></i><?= htmlspecialchars($row['nama_lengkap']) ?></td>
-                                    <td data-label="Jabatan">
-                                        <?php
-                                            $jabatan = htmlspecialchars($row['jabatan']);
-                                            $badge_class = '';
-                                            // Tentukan kelas CSS berdasarkan nilai jabatan
-                                            switch (strtolower($jabatan)) {
-                                                case 'ketua':
-                                                    $badge_class = 'ketua';
-                                                    break;
-                                                case 'wakil ketua':
-                                                    $badge_class = 'wakilketua';
-                                                    break;
-                                                case 'sekretaris':
-                                                    $badge_class = 'sekretaris';
-                                                    break;
-                                                case 'bendahara':
-                                                    $badge_class = 'bendahara';
-                                                    break;
-                                                case 'anggota':
-                                                    $badge_class = 'anggota';
-                                                    break;
-                                                case 'humas':
-                                                    $badge_class = 'humas';
-                                                    break;
-                                                default:
-                                                    // Jika jabatan tidak dikenali, tidak perlu menambahkan kelas badge
-                                                    $badge_class = '';
-                                                    break;
-                                            }
-                                        ?>
+                                <?php
+                                    // Tentukan kelas CSS badge berdasarkan nilai jabatan
+                                    $jabatan = htmlspecialchars($row['jabatan']);
+                                    $badge_class = 'badge '; // Kelas dasar untuk badge
 
-                                        <span class="badge <?= $badge_class ?>">
-                                            <?= $jabatan ?>
-                                        </span>
-                                    </td>
-                                    <td><?= htmlspecialchars($row['bergabung_sejak']) ?></td>
-                                    <td>
-                                        <button class="btn-action btn-warning-custom me-2 edit-btn" data-bs-toggle="modal" data-bs-target="#editAnggotaModal" data-id="<?= $row['id'] ?>" data-nama="<?= $row['nama_lengkap'] ?>" data-jabatan="<?= $row['jabatan'] ?>" data-sejak="<?= $row['bergabung_sejak'] ?>">
-                                            <i class="fa-solid fa-edit"></i>
-                                        </button>
-                                        <form action="" method="POST" class="d-inline">
-                                            <input type="hidden" name="action" value="delete">
-                                            <input type="hidden" name="tab" value="anggota">
-                                            <input type="hidden" name="id" value="<?= $row['id'] ?>">
-                                            <button type="submit" class="btn btn-danger btn-action" onclick="return confirm('Apakah Anda yakin ingin menghapus data ini?')"><i class="fa-solid fa-trash"></i></button>
-                                        </form>
-                                    </td>
-                                </tr>
+                                    switch (strtolower($jabatan)) {
+                                        case 'ketua':
+                                            $badge_class .= 'ketua';
+                                            break;
+                                        case 'wakil ketua':
+                                            $badge_class .= 'wakilketua';
+                                            break;
+                                        case 'sekretaris':
+                                            $badge_class .= 'sekretaris';
+                                            break;
+                                        case 'bendahara':
+                                            $badge_class .= 'bendahara';
+                                            break;
+                                        case 'anggota':
+                                            $badge_class .= 'anggota';
+                                            break;
+                                        case 'humas':
+                                            $badge_class .= 'humas';
+                                            break;
+                                        
+                                    }
+
+                                    // Tentukan gambar profil atau ikon default
+                                    $profile_image = 'https://bootdey.com/img/Content/avatar/avatar1.png'; // Ganti dengan URL gambar default yang sesuai
+                                ?>
+                                <div class="col-xl-3 col-sm-6">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <div class="dropdown float-end">
+                                                <a class="text-muted dropdown-toggle font-size-16" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true"><i class="bx bx-dots-horizontal-rounded"></i></a>
+                                                <div class="dropdown-menu dropdown-menu-end">
+                                                    <a class="dropdown-item edit-btn" href="#" data-bs-toggle="modal" data-bs-target="#editAnggotaModal" data-id="<?= $row['id'] ?>" data-nama="<?= htmlspecialchars($row['nama_lengkap']) ?>" data-jabatan="<?= htmlspecialchars($row['jabatan']) ?>" data-sejak="<?= htmlspecialchars($row['bergabung_sejak']) ?>">
+                                                        <i class="bx bx-edit me-1"></i> Edit
+                                                    </a>
+                                                    <form action="" method="POST" class="d-inline">
+                                                        <input type="hidden" name="action" value="delete">
+                                                        <input type="hidden" name="tab" value="anggota">
+                                                        <input type="hidden" name="id" value="<?= $row['id'] ?>">
+                                                        <button type="submit" class="dropdown-item text-danger" onclick="return confirm('Apakah Anda yakin ingin menghapus data ini?')">
+                                                            <i class="bx bx-trash me-1"></i> Hapus
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                            <div class="d-flex align-items-center">
+                                                <div>
+                                                    <img src="<?= $profile_image ?>" alt="<?= htmlspecialchars($row['nama_lengkap']) ?>" class="avatar-md rounded-circle img-thumbnail" />
+                                                </div>
+                                                <div class="flex-1 ms-3">
+                                                    <h5 class="font-size-16 mb-1"><a href="#" class="text-dark"><?= htmlspecialchars($row['nama_lengkap']) ?></a></h5>
+                                                    <span class="<?= $badge_class ?> mb-0"><?= $jabatan ?></span>
+                                                </div>
+                                            </div>
+                                            <div class="mt-3 pt-1">
+                                                <p class="text-muted mb-0"><i class="mdi mdi-calendar font-size-15 align-middle pe-2 text-primary"></i> Bergabung: <?= htmlspecialchars($row['bergabung_sejak']) ?></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             <?php endforeach; ?>
-                        <?php else: ?>
-                            <tr>
-                                <td colspan="5" class="text-center text-muted">Tidak ada data anggota.</td>
-                            </tr>
-                        <?php endif; ?>
+                        </div>
+                    <?php else: ?>
+                        <div class="col-12 text-center text-muted mt-5">
+                            <p>Tidak ada data anggota.</p>
+                        </div>
+                    <?php endif; ?>
                     </tbody>
                 </table>
                 <?php if ($total_pages > 1): ?>
@@ -682,45 +700,7 @@ if ($result_lokasi && $result_lokasi->num_rows > 0) {
                         </li>
                     </ul>
                 </nav>
-            <?php endif; ?>
-                <div class="d-md-none">
-                    <?php if (count($anggota) > 0): ?>
-                        <?php foreach ($anggota as $row): ?>
-                            <div class="card-item">
-                                <div>
-                                    <span class="label">ID</span>
-                                    <span class="value"><?= htmlspecialchars($row['id']) ?></span>
-                                </div>
-                                <div>
-                                    <span class="label">Nama Lengkap</span>
-                                    <span class="value"><i class="fa-solid fa-user-circle me-2"></i><?= htmlspecialchars($row['nama_lengkap']) ?></span>
-                                </div>
-                                <div>
-                                    <span class="label">Jabatan</span>
-                                    <span class="value"><?= htmlspecialchars($row['jabatan']) ?></span>
-                                </div>
-                                <div>
-                                    <span class="label">Bergabung Sejak</span>
-                                    <span class="value"><?= htmlspecialchars($row['bergabung_sejak']) ?></span>
-                                </div>
-                                <div class="btn-group">
-                                    <button class="btn-action btn-warning-custom edit-btn" data-bs-toggle="modal" data-bs-target="#editAnggotaModal" data-id="<?= $row['id'] ?>" data-nama="<?= $row['nama_lengkap'] ?>" data-jabatan="<?= $row['jabatan'] ?>" data-sejak="<?= $row['bergabung_sejak'] ?>">
-                                        <i class="fa-solid fa-edit"></i>
-                                    </button>
-                                    <form action="" method="POST" class="d-inline">
-                                        <input type="hidden" name="action" value="delete">
-                                        <input type="hidden" name="tab" value="anggota">
-                                        <input type="hidden" name="id" value="<?= $row['id'] ?>">
-                                        <button type="submit" class="btn btn-danger btn-action" onclick="return confirm('Apakah Anda yakin ingin menghapus data ini?')"><i class="fa-solid fa-trash"></i></button>
-                                    </form>
-                                </div>
-                            </div>
-                        <?php endforeach; ?>
-                    <?php else: ?>
-                        <div class="text-center text-muted">Tidak ada data anggota.</div>
-                    <?php endif; ?>
-                </div>
-                
+                <?php endif; ?>        
             </div>
             <?php if ($total_pages > 1): ?>
                 <nav aria-label="Page navigation example" class="mt-4 d-md-none">
@@ -762,7 +742,7 @@ if ($result_lokasi && $result_lokasi->num_rows > 0) {
             </div>
             <div class="table-responsive">
                 <table class="table table-hover table-striped d-none d-md-table">
-                    <thead>
+                    <!--<thead>
                         <tr>
                             <th scope="col">ID</th>
                             <th scope="col">Nama Kegiatan</th>
@@ -771,34 +751,56 @@ if ($result_lokasi && $result_lokasi->num_rows > 0) {
                             <th scope="col">Tanggal Mulai</th>
                             <th scope="col">Aksi</th>
                         </tr>
-                    </thead>
+                    </thead>-->
                     <tbody>
                         <?php if (count($kegiatan) > 0): ?>
+                        <div class="row">
                             <?php foreach ($kegiatan as $row): ?>
-                                <tr>
-                                    <td><?= htmlspecialchars($row['id']) ?></td>
-                                    <td><?= htmlspecialchars($row['nama_kegiatan']) ?></td>
-                                    <td><?= htmlspecialchars($row['deskripsi']) ?></td>
-                                    <td><?= htmlspecialchars($row['lokasi']) ?></td>
-                                    <td><?= htmlspecialchars($row['tanggal_mulai']) ?></td>
-                                    <td>
-                                        <button class="btn-action btn-warning-custom me-2 edit-btn" data-bs-toggle="modal" data-bs-target="#editKegiatanModal" data-id="<?= $row['id'] ?>" data-nama="<?= $row['nama_kegiatan'] ?>" data-deskripsi="<?= $row['deskripsi'] ?>" data-lokasi="<?= $row['lokasi'] ?>" data-tanggal="<?= $row['tanggal_mulai'] ?>">
-                                            <i class="fa-solid fa-edit"></i>
-                                        </button>
-                                        <form action="" method="POST" class="d-inline">
-                                            <input type="hidden" name="action" value="delete">
-                                            <input type="hidden" name="tab" value="kegiatan">
-                                            <input type="hidden" name="id" value="<?= $row['id'] ?>">
-                                            <button type="submit" class="btn btn-danger btn-action" onclick="return confirm('Apakah Anda yakin ingin menghapus data ini?')"><i class="fa-solid fa-trash"></i></button>
-                                        </form>
-                                    </td>
-                                </tr>
+                                <div class="col-xl-4 col-sm-6">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <div class="dropdown float-end">
+                                                <a class="text-muted dropdown-toggle font-size-16" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true"><i class="bx bx-dots-horizontal-rounded"></i></a>
+                                                <div class="dropdown-menu dropdown-menu-end">
+                                                    <a class="dropdown-item edit-btn" href="#" data-bs-toggle="modal" data-bs-target="#editKegiatanModal" data-id="<?= $row['id'] ?>" data-nama="<?= htmlspecialchars($row['nama_kegiatan']) ?>" data-deskripsi="<?= htmlspecialchars($row['deskripsi']) ?>" data-lokasi="<?= htmlspecialchars($row['lokasi']) ?>" data-tanggal="<?= htmlspecialchars($row['tanggal_mulai']) ?>">
+                                                        <i class="bx bx-edit me-1"></i> Edit
+                                                    </a>
+                                                    <form action="" method="POST" class="d-inline">
+                                                        <input type="hidden" name="action" value="delete">
+                                                        <input type="hidden" name="tab" value="kegiatan">
+                                                        <input type="hidden" name="id" value="<?= $row['id'] ?>">
+                                                        <button type="submit" class="dropdown-item text-danger" onclick="return confirm('Apakah Anda yakin ingin menghapus data ini?')">
+                                                            <i class="bx bx-trash me-1"></i> Hapus
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                            <div class="d-flex align-items-center">
+                                                <div class="avatar-md">
+                                                    <div class="avatar-title bg-soft-primary text-primary display-6 m-0 rounded-circle">
+                                                        <i class="bx bx-calendar-event"></i>
+                                                    </div>
+                                                </div>
+                                                <div class="flex-1 ms-3">
+                                                    <h5 class="font-size-16 mb-1 text-dark"><?= htmlspecialchars($row['nama_kegiatan']) ?></h5>
+                                                    <span class="badge badge-soft-success mb-0">Aktif</span>
+                                                </div>
+                                            </div>
+                                            <div class="mt-3 pt-1">
+                                                <p class="text-muted mb-2"><i class="mdi mdi-map-marker-outline font-size-15 align-middle pe-2 text-primary"></i> <?= htmlspecialchars($row['lokasi']) ?></p>
+                                                <p class="text-muted mb-2"><i class="mdi mdi-text-long font-size-15 align-middle pe-2 text-primary"></i> <?= htmlspecialchars($row['deskripsi']) ?></p>
+                                                <p class="text-muted mb-0"><i class="mdi mdi-calendar-range font-size-15 align-middle pe-2 text-primary"></i> <?= htmlspecialchars($row['tanggal_mulai']) ?></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             <?php endforeach; ?>
-                        <?php else: ?>
-                            <tr>
-                                <td colspan="6" class="text-center text-muted">Tidak ada data kegiatan.</td>
-                            </tr>
-                        <?php endif; ?>
+                        </div>
+                    <?php else: ?>
+                        <div class="col-12 text-center text-muted mt-5">
+                            <p>Tidak ada data kegiatan.</p>
+                        </div>
+                    <?php endif; ?>
                     </tbody>
                 </table>
                 <?php if ($total_pages > 1): ?>
@@ -817,48 +819,7 @@ if ($result_lokasi && $result_lokasi->num_rows > 0) {
                         </li>
                     </ul>
                 </nav>
-            <?php endif; ?>
-                <div class="d-md-none">
-                    <?php if (count($kegiatan) > 0): ?>
-                        <?php foreach ($kegiatan as $row): ?>
-                            <div class="card-item">
-                                <div>
-                                    <span class="label">ID</span>
-                                    <span class="value"><?= htmlspecialchars($row['id']) ?></span>
-                                </div>
-                                <div>
-                                    <span class="label">Nama Kegiatan</span>
-                                    <span class="value"><?= htmlspecialchars($row['nama_kegiatan']) ?></span>
-                                </div>
-                                <div>
-                                    <span class="label">Deskripsi</span>
-                                    <span class="value"><?= htmlspecialchars($row['deskripsi']) ?></span>
-                                </div>
-                                <div>
-                                    <span class="label">Lokasi</span>
-                                    <span class="value"><?= htmlspecialchars($row['lokasi']) ?></span>
-                                </div>
-                                <div>
-                                    <span class="label">Tanggal Mulai</span>
-                                    <span class="value"><?= htmlspecialchars($row['tanggal_mulai']) ?></span>
-                                </div>
-                                <div class="btn-group">
-                                    <button class="btn-action btn-warning-custom edit-btn" data-bs-toggle="modal" data-bs-target="#editKegiatanModal" data-id="<?= $row['id'] ?>" data-nama="<?= $row['nama_kegiatan'] ?>" data-deskripsi="<?= $row['deskripsi'] ?>" data-lokasi="<?= $row['lokasi'] ?>" data-tanggal="<?= $row['tanggal_mulai'] ?>">
-                                        <i class="fa-solid fa-edit"></i>
-                                    </button>
-                                    <form action="" method="POST" class="d-inline">
-                                        <input type="hidden" name="action" value="delete">
-                                        <input type="hidden" name="tab" value="kegiatan">
-                                        <input type="hidden" name="id" value="<?= $row['id'] ?>">
-                                        <button type="submit" class="btn btn-danger btn-action" onclick="return confirm('Apakah Anda yakin ingin menghapus data ini?')"><i class="fa-solid fa-trash"></i></button>
-                                    </form>
-                                </div>
-                            </div>
-                        <?php endforeach; ?>
-                    <?php else: ?>
-                        <div class="text-center text-muted">Tidak ada data kegiatan.</div>
-                    <?php endif; ?>
-                </div>
+            <?php endif; ?>                
             </div>
             <?php if ($total_pages > 1): ?>
                 <nav aria-label="Page navigation example" class="mt-4 d-md-none">
@@ -954,7 +915,7 @@ if ($result_lokasi && $result_lokasi->num_rows > 0) {
             </div>
             <div class="table-responsive">
                 <table class="table table-hover table-striped d-none d-md-table">
-                    <thead>
+                    <!--<thead>
                         <tr>
                             <th scope="col">ID</th>
                             <th scope="col">Jenis Transaksi</th>
@@ -964,39 +925,68 @@ if ($result_lokasi && $result_lokasi->num_rows > 0) {
                             <th scope="col">Dicatat Oleh</th>
                             <th scope="col">Aksi</th>
                         </tr>
-                    </thead>
+                    </thead>-->
                     <tbody>
-                        <?php if (count($keuangan) > 0): ?>
-                            <?php foreach ($keuangan as $row): ?>
-                                <tr>
-                                    <td><?= htmlspecialchars($row['id']) ?></td>
-                                    <td>
-                                        <span class="badge rounded-pill <?= ($row['jenis_transaksi'] == 'pemasukan') ? 'bg-success' : 'bg-danger' ?>">
-                                            <?= htmlspecialchars(ucfirst($row['jenis_transaksi'])) ?>
-                                        </span>
-                                    </td>
-                                    <td>Rp<?= htmlspecialchars(number_format($row['jumlah'], 0, ',', '.')) ?></td>
-                                    <td><?= htmlspecialchars($row['deskripsi']) ?></td>
-                                    <td><?= htmlspecialchars($row['tanggal_transaksi']) ?></td>
-                                    <td><?= htmlspecialchars($row['dicatat_oleh_nama']) ?></td>
-                                    <td>
-                                        <button class="btn-action btn-warning-custom me-2 edit-btn" data-bs-toggle="modal" data-bs-target="#editKeuanganModal" data-id="<?= $row['id'] ?>" data-jenis="<?= $row['jenis_transaksi'] ?>" data-jumlah="<?= $row['jumlah'] ?>" data-deskripsi="<?= $row['deskripsi'] ?>" data-tanggal="<?= $row['tanggal_transaksi'] ?>">
-                                            <i class="fa-solid fa-edit"></i>
-                                        </button>
-                                        <form action="" method="POST" class="d-inline">
-                                            <input type="hidden" name="action" value="delete">
-                                            <input type="hidden" name="tab" value="keuangan">
-                                            <input type="hidden" name="id" value="<?= $row['id'] ?>">
-                                            <button type="submit" class="btn btn-danger btn-action" onclick="return confirm('Apakah Anda yakin ingin menghapus data ini?')"><i class="fa-solid fa-trash"></i></button>
-                                        </form>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        <?php else: ?>
-                            <tr>
-                                <td colspan="7" class="text-center text-muted">Tidak ada data keuangan.</td>
-                            </tr>
-                        <?php endif; ?>
+                        <div class="row">
+                            <?php if (count($keuangan) > 0): ?>
+                                <?php foreach ($keuangan as $row): ?>
+                                    <?php
+                                        // Tentukan kelas CSS berdasarkan jenis transaksi
+                                        $icon_class = ($row['jenis_transaksi'] == 'pemasukan') ? 'mdi mdi-trending-up' : 'mdi mdi-trending-down';
+                                        $icon_bg_class = ($row['jenis_transaksi'] == 'pemasukan') ? 'bg-soft-success text-success' : 'bg-soft-danger text-danger';
+                                        $amount_color = ($row['jenis_transaksi'] == 'pemasukan') ? 'text-success' : 'text-danger';
+                                        $badge_class = ($row['jenis_transaksi'] == 'pemasukan') ? 'bg-success' : 'bg-danger';
+                                        $title_text = ($row['jenis_transaksi'] == 'pemasukan') ? 'Pemasukan' : 'Pengeluaran';
+                                    ?>
+                                    <div class="col-xl-3 col-sm-6 mb-4">
+                                        <div class="card h-100 shadow-sm">
+                                            <div class="card-body">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="avatar-md flex-shrink-0">
+                                                        <div class="avatar-title <?= $icon_bg_class ?> display-6 m-0 rounded-circle">
+                                                            <i class="<?= $icon_class ?>"></i>
+                                                        </div>
+                                                    </div>
+                                                    <div class="flex-1 ms-3">
+                                                        <h5 class="font-size-16 mb-1 text-dark"><?= htmlspecialchars($title_text) ?></h5>
+                                                        <span class="badge <?= $badge_class ?> mb-0"><?= htmlspecialchars(ucfirst($row['deskripsi'])) ?></span>
+                                                    </div>
+                                                    <div class="ms-auto">
+                                                        <div class="dropdown">
+                                                            <a class="text-muted dropdown-toggle font-size-16" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true">
+                                                                <i class="bx bx-dots-horizontal-rounded"></i>
+                                                            </a>
+                                                            <div class="dropdown-menu dropdown-menu-end">
+                                                                <a class="dropdown-item edit-btn" href="#" data-bs-toggle="modal" data-bs-target="#editKeuanganModal" data-id="<?= $row['id'] ?>" data-jenis="<?= $row['jenis_transaksi'] ?>" data-jumlah="<?= $row['jumlah'] ?>" data-deskripsi="<?= $row['deskripsi'] ?>" data-tanggal="<?= $row['tanggal_transaksi'] ?>">
+                                                                    <i class="bx bx-edit me-1"></i> Edit
+                                                                </a>
+                                                                <form action="" method="POST" class="d-inline">
+                                                                    <input type="hidden" name="action" value="delete">
+                                                                    <input type="hidden" name="tab" value="keuangan">
+                                                                    <input type="hidden" name="id" value="<?= $row['id'] ?>">
+                                                                    <button type="submit" class="dropdown-item text-danger" onclick="return confirm('Apakah Anda yakin ingin menghapus data ini?')">
+                                                                        <i class="bx bx-trash me-1"></i> Hapus
+                                                                    </button>
+                                                                </form>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="mt-3 pt-1">
+                                                    <h4 class="<?= $amount_color ?> mb-0">Rp<?= htmlspecialchars(number_format($row['jumlah'], 0, ',', '.')) ?></h4>
+                                                    <p class="text-muted mb-0 mt-2"><i class="mdi mdi-calendar-range font-size-15 align-middle pe-2 text-primary"></i> <?= htmlspecialchars($row['tanggal_transaksi']) ?></p>
+                                                    <p class="text-muted mb-0 mt-2"><i class="mdi mdi-account-circle-outline font-size-15 align-middle pe-2 text-primary"></i> Dicatat oleh: <?= htmlspecialchars($row['dicatat_oleh_nama']) ?></p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <div class="col-12 text-center text-muted">
+                                    <p>Tidak ada data keuangan.</p>
+                                </div>
+                            <?php endif; ?>
+                        </div>
                     </tbody>
                 </table>
                 <?php if ($total_pages > 1): ?>
@@ -1017,55 +1007,7 @@ if ($result_lokasi && $result_lokasi->num_rows > 0) {
                 </nav>
             <?php endif; ?>
 
-                <div class="d-md-none">
-                    <?php if (count($keuangan) > 0): ?>
-                        <?php foreach ($keuangan as $row): ?>
-                            <div class="card-item">
-                                <div>
-                                    <span class="label">ID</span>
-                                    <span class="value"><?= htmlspecialchars($row['id']) ?></span>
-                                </div>
-                                <div>
-                                    <span class="label">Jenis Transaksi</span>
-                                    <span class="value">
-                                        <span class="badge rounded-pill <?= ($row['jenis_transaksi'] == 'pemasukan') ? 'bg-success' : 'bg-danger' ?>">
-                                            <?= htmlspecialchars(ucfirst($row['jenis_transaksi'])) ?>
-                                        </span>
-                                    </span>
-                                </div>
-                                <div>
-                                    <span class="label">Jumlah</span>
-                                    <span class="value">Rp<?= htmlspecialchars(number_format($row['jumlah'], 0, ',', '.')) ?></span>
-                                </div>
-                                <div>
-                                    <span class="label">Deskripsi</span>
-                                    <span class="value"><?= htmlspecialchars($row['deskripsi']) ?></span>
-                                </div>
-                                <div>
-                                    <span class="label">Tanggal</span>
-                                    <span class="value"><?= htmlspecialchars($row['tanggal_transaksi']) ?></span>
-                                </div>
-                                <div>
-                                    <span class="label">Dicatat Oleh</span>
-                                    <span class="value"><?= htmlspecialchars($row['dicatat_oleh_nama']) ?></span>
-                                </div>
-                                <div class="btn-group">
-                                    <button class="btn-action btn-warning-custom edit-btn" data-bs-toggle="modal" data-bs-target="#editKeuanganModal" data-id="<?= $row['id'] ?>" data-jenis="<?= $row['jenis_transaksi'] ?>" data-jumlah="<?= $row['jumlah'] ?>" data-deskripsi="<?= $row['deskripsi'] ?>" data-tanggal="<?= $row['tanggal_transaksi'] ?>">
-                                        <i class="fa-solid fa-edit"></i>
-                                    </button>
-                                    <form action="" method="POST" class="d-inline">
-                                        <input type="hidden" name="action" value="delete">
-                                        <input type="hidden" name="tab" value="keuangan">
-                                        <input type="hidden" name="id" value="<?= $row['id'] ?>">
-                                        <button type="submit" class="btn btn-danger btn-action" onclick="return confirm('Apakah Anda yakin ingin menghapus data ini?')"><i class="fa-solid fa-trash"></i></button>
-                                    </form>
-                                </div>
-                            </div>
-                        <?php endforeach; ?>
-                    <?php else: ?>
-                        <div class="text-center text-muted">Tidak ada data keuangan.</div>
-                    <?php endif; ?>
-                </div>
+                
             </div>
             <?php if ($total_pages > 1): ?>
                 <nav aria-label="Page navigation example" class="mt-4 d-md-none">
@@ -1142,7 +1084,7 @@ if ($result_lokasi && $result_lokasi->num_rows > 0) {
             </div>
             <div class="table-responsive">
                 <table class="table table-hover table-striped d-none d-md-table">
-                    <thead>
+                    <!--<thead>
                         <tr>
                         
                             <th scope="col">ID Anggota</th>
@@ -1151,49 +1093,89 @@ if ($result_lokasi && $result_lokasi->num_rows > 0) {
                             <th scope="col" class="text-end">Jumlah Bayar</th>
                             <th scope="col">Aksi</th>
                         </tr>
-                    </thead>
+                    </thead>-->
                     <tbody>
-                        <?php if (count($iuran) > 0): ?>
-                            <?php foreach ($iuran as $row): ?>
-                                <?php
-                                $anggotaName = 'Tidak Ditemukan';
-                                // Periksa jika ada anggota_nama dari join (jika search term diterapkan)
-                                if (isset($row['anggota_nama'])) {
-                                    $anggotaName = $row['anggota_nama'];
-                                } else {
-                                    // Jika tidak ada join, cari manual dari anggotaList
-                                    foreach ($anggotaList as $member) {
-                                        if ($member['id'] == $row['anggota_id']) {
-                                            $anggotaName = $member['nama_lengkap'];
-                                            break;
+                        <div class="row">
+                            <?php if (count($iuran) > 0): ?>
+                                <?php foreach ($iuran as $row): ?>
+                                    <?php
+                                        $anggotaName = 'Tidak Ditemukan';
+                                        // Periksa jika ada anggota_nama dari join (jika search term diterapkan)
+                                        if (isset($row['anggota_nama'])) {
+                                            $anggotaName = $row['anggota_nama'];
+                                        } else {
+                                            // Jika tidak ada join, cari manual dari anggotaList
+                                            foreach ($anggotaList as $member) {
+                                                if ($member['id'] == $row['anggota_id']) {
+                                                    $anggotaName = $member['nama_lengkap'];
+                                                    break;
+                                                }
+                                            }
                                         }
-                                    }
-                                }
-                                ?>
-                                <tr>
-                                    
-                                    <td><?= htmlspecialchars($row['anggota_id']) ?></td>
-                                    <td><i class="fa-solid fa-user-circle me-2"></i><?= htmlspecialchars($anggotaName) ?></td>
-                                    <td><?= htmlspecialchars($row['tanggal_bayar']) ?></td>
-                                    <td class="text-end">Rp<?= htmlspecialchars(number_format($row['jumlah_bayar'], 0, ',', '.')) ?></td>
-                                    <td>
-                                        <button class="btn-action btn-warning-custom me-2 edit-btn" data-bs-toggle="modal" data-bs-target="#editIuranModal" data-id="<?= $row['id'] ?>" data-anggota-id="<?= $row['anggota_id'] ?>" data-tanggal="<?= $row['tanggal_bayar'] ?>" data-jumlah="<?= $row['jumlah_bayar'] ?>" data-keterangan="<?= $row['keterangan'] ?>">
-                                            <i class="fa-solid fa-edit"></i>
-                                        </button>
-                                        <form action="" method="POST" class="d-inline">
-                                            <input type="hidden" name="action" value="delete">
-                                            <input type="hidden" name="tab" value="iuran">
-                                            <input type="hidden" name="id" value="<?= $row['id'] ?>">
-                                            <button type="submit" class="btn btn-danger btn-action" onclick="return confirm('Apakah Anda yakin ingin menghapus data ini?')"><i class="fa-solid fa-trash"></i></button>
-                                        </form>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        <?php else: ?>
-                            <tr>
-                                <td colspan="6" class="text-center text-muted">Tidak ada data iuran.</td>
-                            </tr>
-                        <?php endif; ?>
+                                        // Logika untuk menentukan status berdasarkan DUES_MONTHLY_FEE dari config.php
+                                        $status = ($row['jumlah_bayar'] >= DUES_MONTHLY_FEE) ? 'Lunas' : 'Belum Lunas';
+                                        $badgeClass = ($status == 'Lunas') ? 'bg-success' : 'bg-danger';
+                                    ?>
+                                    <div class="col-xl-3 col-sm-6 mb-4">
+                                        <div class="card h-100 shadow-sm">
+                                            <div class="card-body">
+                                                <div class="dropdown float-end">
+                                                    <a class="text-muted dropdown-toggle font-size-16" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true">
+                                                        <i class="bx bx-dots-horizontal-rounded"></i>
+                                                    </a>
+                                                    <div class="dropdown-menu dropdown-menu-end">
+                                                        <a class="dropdown-item edit-btn" href="#" data-bs-toggle="modal" data-bs-target="#editIuranModal" data-id="<?= $row['id'] ?>" data-anggota-id="<?= $row['anggota_id'] ?>" data-tanggal="<?= $row['tanggal_bayar'] ?>" data-jumlah="<?= $row['jumlah_bayar'] ?>" data-keterangan="<?= $row['keterangan'] ?>">
+                                                            <i class="bx bx-edit me-1"></i> Edit
+                                                        </a>
+                                                        <form action="" method="POST" class="d-inline">
+                                                            <input type="hidden" name="action" value="delete">
+                                                            <input type="hidden" name="tab" value="iuran">
+                                                            <input type="hidden" name="id" value="<?= $row['id'] ?>">
+                                                            <button type="submit" class="dropdown-item text-danger" onclick="return confirm('Apakah Anda yakin ingin menghapus data ini?')">
+                                                                <i class="bx bx-trash me-1"></i> Hapus
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="avatar-md">
+                                                        <div class="avatar-title bg-soft-primary text-primary display-6 m-0 rounded-circle">
+                                                            <i class="bx bxs-wallet"></i>
+                                                        </div>
+                                                    </div>
+                                                    <div class="flex-1 ms-3">
+                                                        <h5 class="font-size-16 mb-1">
+                                                            <a href="?tab=iuran&member_id=<?= htmlspecialchars($row['anggota_id']) ?>" class="text-dark">
+                                                                <?= htmlspecialchars($anggotaName) ?>
+                                                            </a>
+                                                        </h5>
+                                                        <span class="badge <?= $badgeClass ?> mb-0"><?= $status ?></span>
+                                                    </div>
+                                                </div>
+
+                                                <div class="mt-3 pt-1">
+                                                    <p class="text-muted mb-0">
+                                                        <i class="mdi mdi-calendar font-size-15 align-middle pe-2 text-primary"></i> Tanggal Bayar: <span class="float-end"><?= htmlspecialchars($row['tanggal_bayar']) ?></span>
+                                                    </p>
+                                                    <p class="text-muted mb-0 mt-2">
+                                                        <i class="mdi mdi-currency-usd font-size-15 align-middle pe-2 text-primary"></i> Jumlah: <span class="float-end fw-bold">Rp<?= htmlspecialchars(number_format($row['jumlah_bayar'], 0, ',', '.')) ?></span>
+                                                    </p>
+                                                </div>
+                                            <!-- <div class="d-flex gap-2 pt-4">
+                                                    <a href="?tab=iuran&member_id=<?= htmlspecialchars($row['anggota_id']) ?>" class="btn btn-soft-primary btn-sm w-100">
+                                                        <i class="bx bx-receipt me-1"></i> Detail Riwayat
+                                                    </a>
+                                                </div>-->
+                                            </div>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <div class="col-12 text-center text-muted">
+                                    <p>Tidak ada data iuran.</p>
+                                </div>
+                            <?php endif; ?>
+                        </div>
                     </tbody>
                 </table>
                 <?php if ($total_pages > 1): ?>
@@ -1212,60 +1194,9 @@ if ($result_lokasi && $result_lokasi->num_rows > 0) {
                         </li>
                     </ul>
                 </nav>
-            <?php endif; ?>
-                <div class="d-md-none">
-                    <?php if (count($iuran) > 0): ?>
-                        <?php foreach ($iuran as $row): ?>
-                            <?php
-                            $anggotaName = 'Tidak Ditemukan';
-                            if (isset($row['anggota_nama'])) {
-                                $anggotaName = $row['anggota_nama'];
-                            } else {
-                                foreach ($anggotaList as $member) {
-                                    if ($member['id'] == $row['anggota_id']) {
-                                        $anggotaName = $member['nama_lengkap'];
-                                        break;
-                                    }
-                                }
-                            }
-                            ?>
-                            <div class="card-item">
-                                
-                                <div>
-                                    <span class="label">ID Anggota</span>
-                                    <span class="value"><?= htmlspecialchars($row['anggota_id']) ?></span>
-                                </div>
-                                <div>
-                                    <span class="label">Nama Anggota</span>
-                                    <span class="value"><i class="fa-solid fa-user-circle me-2"></i><?= htmlspecialchars($anggotaName) ?></span>
-                                </div>
-                                <div>
-                                    <span class="label">Tanggal Bayar</span>
-                                    <span class="value"><?= htmlspecialchars($row['tanggal_bayar']) ?></span>
-                                </div>
-                                <div>
-                                    <span class="label">Jumlah Bayar</span>
-                                    <span class="value">Rp<?= htmlspecialchars(number_format($row['jumlah_bayar'], 0, ',', '.')) ?></span>
-                                </div>
-                                <div class="btn-group">
-                                    <button class="btn-action btn-warning-custom edit-btn" data-bs-toggle="modal" data-bs-target="#editIuranModal" data-id="<?= $row['id'] ?>" data-anggota-id="<?= $row['anggota_id'] ?>" data-tanggal="<?= $row['tanggal_bayar'] ?>" data-jumlah="<?= $row['jumlah_bayar'] ?>" data-keterangan="<?= $row['keterangan'] ?>">
-                                        <i class="fa-solid fa-edit"></i>
-                                    </button>
-                                    <form action="" method="POST" class="d-inline">
-                                        <input type="hidden" name="action" value="delete">
-                                        <input type="hidden" name="tab" value="iuran">
-                                        <input type="hidden" name="id" value="<?= $row['id'] ?>">
-                                        <button type="submit" class="btn btn-danger btn-action" onclick="return confirm('Apakah Anda yakin ingin menghapus data ini?')"><i class="fa-solid fa-trash"></i></button>
-                                    </form>
-                                </div>
-                            </div>
-                        <?php endforeach; ?>
-                    <?php else: ?>
-                        <div class="text-center text-muted">Tidak ada data iuran.</div>
-                    <?php endif; ?>
-                </div>
+            <?php endif; ?>                
             </div>
-             <?php if ($total_pages > 1): ?>
+            <?php if ($total_pages > 1): ?>
                 <nav aria-label="Page navigation example" class="mt-4 d-md-none">
                     <ul class="pagination justify-content-center">
                         <li class="page-item <?= ($page <= 1) ? 'disabled' : '' ?>">
@@ -1308,103 +1239,80 @@ if ($result_lokasi && $result_lokasi->num_rows > 0) {
                 </div>
                 <div class="table-responsive">
                     <table class="table table-hover table-striped d-none d-md-table">
-                        <thead>
+                        <!-- <thead>
                             <tr>  
-                            <!--<th scope="col">Id</th>  -->                         
+                        <th scope="col">Id</th>                       
                                 <th scope="col">Username</th>
                                 <th scope="col">Role</th>
                                 <th scope="col">Anggota Terkait</th>
                                 <th scope="col">Aksi</th>
                             </tr>
-                        </thead>
+                        </thead> -->   
                         <tbody>
-                            <?php if (count($users) > 0): ?>
-                                <?php foreach ($users as $row): ?>
-                                    <?php
-                                    $anggotaName = 'Tidak Terkait';
-                                    if ($row['anggota_id'] !== NULL) {
-                                        foreach ($anggotaList as $member) {
-                                            if ($member['id'] == $row['anggota_id']) {
-                                                $anggotaName = $member['nama_lengkap'];
-                                                break;
+                            <div class="row">
+                                <?php if (count($users) > 0): ?>
+                                    <?php foreach ($users as $row): ?>
+                                        <?php
+                                            $anggotaName = 'Tidak Terkait';
+                                            if ($row['anggota_id'] !== NULL) {
+                                                foreach ($anggotaList as $member) {
+                                                    if ($member['id'] == $row['anggota_id']) {
+                                                        $anggotaName = $member['nama_lengkap'];
+                                                        break;
+                                                    }
+                                                }
                                             }
-                                        }
-                                    }
-                                    ?>
-                                    <tr>
-                                        <!--<td><?= htmlspecialchars($row['id']) ?></td>-->
-                                        <td><i class="fa-solid fa-user-circle me-2"></i><?= htmlspecialchars($row['username']) ?></td>
-                                        <td><?= htmlspecialchars($row['role']) ?></td>
-                                        <td><?= htmlspecialchars($anggotaName) ?></td>
-                                        <td>
-                                            <button class="btn-action btn-warning-custom me-2 edit-btn" data-bs-toggle="modal" data-bs-target="#editUsersModal" data-id="<?= $row['id'] ?>" data-username="<?= $row['username'] ?>" data-role="<?= $row['role'] ?>" data-anggota-id="<?= $row['anggota_id'] ?>">
-                                                <i class="fa-solid fa-edit"></i>
-                                            </button>
-                                            <form action="" method="POST" class="d-inline">
-                                                <input type="hidden" name="action" value="delete">
-                                                <input type="hidden" name="tab" value="users">
-                                                <input type="hidden" name="id" value="<?= $row['id'] ?>">
-                                                <button type="submit" class="btn btn-danger btn-action" onclick="return confirm('Apakah Anda yakin ingin menghapus data ini?')"><i class="fa-solid fa-trash"></i></button>
-                                            </form>
-                                        </td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            <?php else: ?>
-                                <tr>
-                                    <td colspan="5" class="text-center text-muted">Tidak ada data user.</td>
-                                </tr>
-                            <?php endif; ?>
+                                        ?>
+                                        <div class="col-xl-3 col-sm-6 mb-4">
+                                            <div class="card h-100 shadow-sm">
+                                                <div class="card-body">
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="avatar-md">
+                                                            <div class="avatar-title bg-soft-primary text-primary display-6 m-0 rounded-circle">
+                                                                <i class="bx bx-user"></i>
+                                                            </div>
+                                                        </div>
+                                                        <div class="flex-1 ms-3">
+                                                            <h5 class="font-size-16 mb-1"><a href="#" class="text-dark"><?= htmlspecialchars($row['username']) ?></a></h5>
+                                                            <span class="badge bg-info mb-0"><?= htmlspecialchars(ucfirst($row['role'])) ?></span>
+                                                        </div>
+                                                        <div class="ms-auto">
+                                                            <div class="dropdown">
+                                                                <a class="text-muted dropdown-toggle font-size-16" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true">
+                                                                    <i class="bx bx-dots-horizontal-rounded"></i>
+                                                                </a>
+                                                                <div class="dropdown-menu dropdown-menu-end">
+                                                                    <a class="dropdown-item edit-btn" href="#" data-bs-toggle="modal" data-bs-target="#editUsersModal" data-id="<?= $row['id'] ?>" data-username="<?= $row['username'] ?>" data-role="<?= $row['role'] ?>" data-anggota-id="<?= $row['anggota_id'] ?>">
+                                                                        <i class="bx bx-edit me-1"></i> Edit
+                                                                    </a>
+                                                                    <form action="" method="POST" class="d-inline">
+                                                                        <input type="hidden" name="action" value="delete">
+                                                                        <input type="hidden" name="tab" value="users">
+                                                                        <input type="hidden" name="id" value="<?= $row['id'] ?>">
+                                                                        <button type="submit" class="dropdown-item text-danger" onclick="return confirm('Apakah Anda yakin ingin menghapus data ini?')">
+                                                                            <i class="bx bx-trash me-1"></i> Hapus
+                                                                        </button>
+                                                                    </form>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="mt-3 pt-1">
+                                                        <p class="text-muted mb-0 mt-2"><i class="mdi mdi-account-card-details font-size-15 align-middle pe-2 text-primary"></i> Anggota Terkait: <span class="float-end"><?= htmlspecialchars($anggotaName) ?></span></p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    <?php endforeach; ?>
+                                <?php else: ?>
+                                    <div class="col-12 text-center text-muted">
+                                        <p>Tidak ada data user.</p>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
                         </tbody>
                     </table>
-                    <div class="d-md-none">
-                        <?php if (count($users) > 0): ?>
-                            <?php foreach ($users as $row): ?>
-                                <?php
-                                $anggotaName = 'Tidak Terkait';
-                                if ($row['anggota_id'] !== NULL) {
-                                    foreach ($anggotaList as $member) {
-                                        if ($member['id'] == $row['anggota_id']) {
-                                            $anggotaName = $member['nama_lengkap'];
-                                            break;
-                                        }
-                                    }
-                                }
-                                ?>
-                                <div class="card-item">
-                                <!--    <div>
-                                        <span class="label">ID</span>
-                                        <span class="value"><?= htmlspecialchars($row['id']) ?></span>
-                                    </div>
-                                -->
-                                    <div>
-                                        <span class="label">Username</span>
-                                        <span class="value"><?= htmlspecialchars($row['username']) ?></span>
-                                    </div>
-                                    <div>
-                                        <span class="label">Role</span>
-                                        <span class="value"><?= htmlspecialchars($row['role']) ?></span>
-                                    </div>
-                                    <div>
-                                        <span class="label">Anggota Terkait</span>
-                                        <span class="value"><i class="fa-solid fa-user-circle me-2"></i><?= htmlspecialchars($anggotaName) ?></span>
-                                    </div>
-                                    <div class="btn-group">
-                                        <button class="btn-action btn-warning-custom edit-btn" data-bs-toggle="modal" data-bs-target="#editUsersModal" data-id="<?= $row['id'] ?>" data-username="<?= $row['username'] ?>" data-role="<?= $row['role'] ?>" data-anggota-id="<?= $row['anggota_id'] ?>">
-                                            <i class="fa-solid fa-edit"></i>
-                                        </button>
-                                        <form action="" method="POST" class="d-inline">
-                                            <input type="hidden" name="action" value="delete">
-                                            <input type="hidden" name="tab" value="users">
-                                            <input type="hidden" name="id" value="<?= $row['id'] ?>">
-                                            <button type="submit" class="btn btn-danger btn-action" onclick="return confirm('Apakah Anda yakin ingin menghapus data ini?')"><i class="fa-solid fa-trash"></i></button>
-                                        </form>
-                                    </div>
-                                </div>
-                            <?php endforeach; ?>
-                        <?php else: ?>
-                            <div class="text-center text-muted">Tidak ada data user.</div>
-                        <?php endif; ?>
-                    </div>
+                    
                 </div>
             <?php endif; ?>
 
